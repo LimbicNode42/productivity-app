@@ -24,20 +24,20 @@ class GoalsPage extends ConsumerWidget {
                 padding: const EdgeInsets.all(8.0),
                 child: NavButton(
                   title: goal.title,
-                  onPress: () => Navigator.pushNamed(context, '/home'),
-                  onLongPress: () => showGoalOptionsDialog(context, ref, goal), // Open options dialog
+                  onPress: () => Navigator.pushNamed(context, '/tasks', arguments: {'goalId': goal.id}),
+                  onLongPress: () => _showGoalOptionsDialog(context, ref, goal), // Open options dialog
                 )
               );
             },
           ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () => showAddGoalDialog(context, ref), // Open add goal dialog
+        onPressed: () => _showAddGoalDialog(context, ref), // Open add goal dialog
         child: Icon(Icons.add),
       ),
     );
   }
 
-  void showAddGoalDialog(BuildContext context, WidgetRef ref) {
+  void _showAddGoalDialog(BuildContext context, WidgetRef ref) {
     final TextEditingController titleController = TextEditingController();
 
     showDialog(
@@ -72,7 +72,7 @@ class GoalsPage extends ConsumerWidget {
     );
   }
 
-  void showGoalOptionsDialog(BuildContext context, WidgetRef ref, Goal goal) {
+  void _showGoalOptionsDialog(BuildContext context, WidgetRef ref, Goal goal) {
     showDialog(
       context: context,
       builder: (context) {
@@ -87,14 +87,14 @@ class GoalsPage extends ConsumerWidget {
             TextButton(
               onPressed: () {
                 Navigator.of(context).pop(); // Close the options dialog
-                showEditGoalDialog(context, ref, goal); // Open the edit dialog
+                _showEditGoalDialog(context, ref, goal); // Open the edit dialog
               },
               child: Text('Edit'),
             ),
             TextButton(
               onPressed: () {
-              Navigator.of(context).pop(); // Close the options dialog
-              showDeleteConfirmationDialog(context, ref, goal); // Confirm deletion
+                Navigator.of(context).pop(); // Close the options dialog
+                _showDeleteConfirmationDialog(context, ref, goal); // Confirm deletion
               },
               child: Text('Delete'),
             ),
@@ -104,7 +104,7 @@ class GoalsPage extends ConsumerWidget {
     );
   }
 
-  void showEditGoalDialog(BuildContext context, WidgetRef ref, Goal goal) {
+  void _showEditGoalDialog(BuildContext context, WidgetRef ref, Goal goal) {
     final TextEditingController editController = TextEditingController(text: goal.title);
 
     showDialog(
@@ -141,7 +141,7 @@ class GoalsPage extends ConsumerWidget {
   }
 
   // Show confirmation dialog to delete a goal
-  void showDeleteConfirmationDialog(BuildContext context, WidgetRef ref, Goal goal) {
+  void _showDeleteConfirmationDialog(BuildContext context, WidgetRef ref, Goal goal) {
     showDialog(
       context: context,
       builder: (context) {
