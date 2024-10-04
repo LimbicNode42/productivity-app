@@ -51,7 +51,7 @@ class HomeScreen extends StatelessWidget {
             
             // Buttons
             NavButton(title: 'Goals', onPress: () => Navigator.pushNamed(context, '/goals')),
-            NavButton(title: 'Alerts', onPress: () => Navigator.pushNamed(context, '/goals')), //TODO: change to right page
+            NavButton(title: 'Alerts', onPress: () => Navigator.pushNamed(context, '/device_apps')), //TODO: change to right page
             NavButton(title: 'Penalties', onPress: () => Navigator.pushNamed(context, '/goals')), //TODO: change to right page
           ],
         ),
