@@ -1,4 +1,5 @@
 // main.dart
+import 'package:flutter_app/pages/installed_apps.dart';
 import 'package:flutter_app/pages/tasks.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:isar/isar.dart';
@@ -57,6 +58,8 @@ class MyApp extends StatelessWidget {
           case '/tasks':
             final args = settings.arguments as Map<String, dynamic>;
             return fadeTransition(TasksPage(goalId: args['goalId']));
+          case '/installed_apps':
+            return fadeTransition(InstalledAppsPage());
           default:
             return fadeTransition(HomeScreen(isPermissionGranted: isPermissionGranted,)); // Fallback if route not found
         }
