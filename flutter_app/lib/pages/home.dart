@@ -2,10 +2,32 @@ import 'package:flutter/material.dart';
 
 import 'package:flutter_app/ui_components/app_bar.dart';
 import 'package:flutter_app/ui_components/buttons.dart';
+import 'package:flutter_app/permissions/barrel.dart';
 
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends StatefulWidget {
+  final bool isPermissionGranted;
+
+  const HomeScreen({Key? key, required this.isPermissionGranted}) : super(key: key);
+
+  @override
+  _HomeScreenState createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+  @override
+  void initState() {
+    super.initState();
+    // Show permission dialog only once in initState
+    if (!widget.isPermissionGranted) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        showUsageAccessDialog(context);
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+
     return Scaffold(
       appBar: MyCustomAppBar(),
       body: Padding(
