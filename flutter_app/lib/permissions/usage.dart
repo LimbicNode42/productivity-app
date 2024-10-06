@@ -25,7 +25,7 @@ Future<bool> checkUsageStatsPermission() async {
 }
 
 Future<bool> _checkNativePermissionStatus() async {
-  const platform = MethodChannel('com.example/usage_permission');
+  const platform = MethodChannel('com.example/android_native');
 
   try {
     final bool isGranted = await platform.invokeMethod('checkUsageStatsPermission');
