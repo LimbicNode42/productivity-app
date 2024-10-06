@@ -6,7 +6,6 @@ import 'package:isar/isar.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter/material.dart';
 
-import 'package:flutter_app/background/service.dart';
 import 'package:flutter_app/permissions/barrel.dart';
 import 'package:flutter_app/models/goals.dart';
 import 'package:flutter_app/dao/goals.dart';
@@ -40,31 +39,10 @@ void main() async {
   );
 }
 
-class MyApp extends StatefulWidget {
+class MyApp extends StatelessWidget {
   final bool isPermissionGranted;
 
   const MyApp({Key? key, required this.isPermissionGranted}) : super(key: key);
-
-  _MyAppState createState() => _MyAppState();
-}
-
-class _MyAppState extends State<MyApp> {
-  bool _isPermissionGranted = false;
-
-  @override
-  void initState() {
-    super.initState();
-    setState(() {
-      _isPermissionGranted = widget.isPermissionGranted;
-    });
-
-    _initializeBackgroundService();
-  }
-
-  Future<void> _initializeBackgroundService() async {
-    // Init app running in background
-    await _initializeBackgroundService();
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -74,7 +52,7 @@ class _MyAppState extends State<MyApp> {
         // Use the route name to decide which page to show
         switch (settings.name) {
           case '/home':
-            return fadeTransition(HomeScreen(isPermissionGranted: _isPermissionGranted,));
+            return fadeTransition(HomeScreen(isPermissionGranted: isPermissionGranted,));
           case '/goals':
             return fadeTransition(GoalsPage());
           case '/tasks':
@@ -83,7 +61,7 @@ class _MyAppState extends State<MyApp> {
           case '/installed_apps':
             return fadeTransition(InstalledAppsPage());
           default:
-            return fadeTransition(HomeScreen(isPermissionGranted: _isPermissionGranted,)); // Fallback if route not found
+            return fadeTransition(HomeScreen(isPermissionGranted: isPermissionGranted,)); // Fallback if route not found
         }
       },
     );
