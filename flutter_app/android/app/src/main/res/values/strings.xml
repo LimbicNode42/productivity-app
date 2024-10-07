@@ -1,0 +1,8 @@
+<resources>
+    <!-- Other string resources -->
+
+    <!-- Add a description for your accessibility service -->
+    <string name="accessibility_service_description">
+        This service helps to monitor app usage and detect apps being opened.
+    </string>
+</resources>

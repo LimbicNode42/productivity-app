@@ -2,6 +2,11 @@ package com.example.flutter_app
 
 import android.app.AppOpsManager
 import android.content.Context
+import android.content.ComponentName
+import android.content.Intent
+import android.provider.Settings
+import android.text.TextUtils
+import android.accessibilityservice.AccessibilityService
 import android.os.Build
 import androidx.annotation.NonNull
 import io.flutter.embedding.android.FlutterActivity
@@ -18,6 +23,12 @@ class MainActivity: FlutterActivity() {
             if (call.method == "checkUsageStatsPermission") {
                 val isGranted = checkUsageStatsPermission()
                 result.success(isGranted)
+            } else if (call.method == "checkAccessibilityPermission") {
+                val isGranted = checkAccessibilityPermission(MyAccessibilityService::class.java)
+                result.success(isGranted)
+            } else if (call.method == "openAccessibilitySettings") {
+                openAccessibilitySettings()
+                result.success(null)
             } else {
                 result.notImplemented()
             }
@@ -32,5 +43,30 @@ class MainActivity: FlutterActivity() {
             appOpsManager.checkOpNoThrow(AppOpsManager.OPSTR_GET_USAGE_STATS, android.os.Process.myUid(), packageName)
         }
         return mode == AppOpsManager.MODE_ALLOWED
+    }
+
+    private fun checkAccessibilityPermission(service: Class<out AccessibilityService>): Boolean {
+        val expectedComponentName = ComponentName(this, service)
+        val enabledServicesSetting: String = Settings.Secure.getString(
+            contentResolver,
+            Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES
+        ) ?: return false
+
+        val colonSplitter = TextUtils.SimpleStringSplitter(':')
+        colonSplitter.setString(enabledServicesSetting)
+
+        while (colonSplitter.hasNext()) {
+            val componentName = colonSplitter.next()
+            if (ComponentName.unflattenFromString(componentName) == expectedComponentName) {
+                return true
+            }
+        }
+
+        return false
+    }
+
+    private fun openAccessibilitySettings() {
+        val intent = Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS)
+        startActivity(intent)
     }
 }

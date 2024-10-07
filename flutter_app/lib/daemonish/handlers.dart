@@ -66,17 +66,17 @@ class MyTaskHandler extends TaskHandler {
   }
 }
 
-void onReceiveTaskData(Object data) {
+// Callback function to handle incoming data
+void onReceiveTaskData(Object? data) {
   if (data is Map<String, dynamic>) {
-    final dynamic timestampMillis = data["timestampMillis"];
-    if (timestampMillis != null) {
-      final DateTime timestamp =
-          DateTime.fromMillisecondsSinceEpoch(timestampMillis, isUtc: true);
-      print('timestamp: ${timestamp.toString()}');
+    // Extract the message from the data
+    final String? eventMessage = data['event_message'] as String?;
+    if (eventMessage != null) {
+      // Handle the data received from the foreground service
+      print('Received event from foreground service: $eventMessage');
     }
   }
 }
-
 // TODO: will need to add a check for permanently denied permission and add prompt to allow
 // Once permanently denied requires user to open settings
 Future<ServiceRequestResult> startForegroundService() async {
@@ -94,4 +94,11 @@ Future<ServiceRequestResult> startForegroundService() async {
       callback: startCallback,
     );
   }
+}
+
+Future<ServiceRequestResult> stopForegroundService() async {
+  if (await FlutterForegroundTask.isRunningService) {
+    return FlutterForegroundTask.stopService();
+  }
+  return ServiceRequestResult.success();
 }

@@ -49,13 +49,14 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
-  bool _isPermissionGranted = false;
+  bool _usagePermission = false;
+  bool _accessibilityPermission = false;
 
   @override
   void initState() {
     super.initState();
 
-    _checkUsagePermission();
+    _checkPermissions();
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       // Request permissions and initialize the service.
@@ -66,13 +67,15 @@ class _MyAppState extends State<MyApp> {
     FlutterForegroundTask.addTaskDataCallback(onReceiveTaskData);
   }
 
-  Future<void> _checkUsagePermission() async {
+  Future<void> _checkPermissions() async {
     // Perform the asynchronous operation
-    bool isGranted = await checkUsageStatsPermission();
+    bool _usageGranted = await checkUsageStatsPermission();
+    bool _accessibilityGranted = await checkAccessibilityPermission();
 
     // Update the state once the permission check is complete
     setState(() {
-      _isPermissionGranted = isGranted;
+      _usagePermission = _usageGranted;
+      _accessibilityPermission = _accessibilityGranted;
     });
   }
 
@@ -84,7 +87,7 @@ class _MyAppState extends State<MyApp> {
         // Use the route name to decide which page to show
         switch (settings.name) {
           case '/home':
-            return fadeTransition(HomeScreen(isPermissionGranted: _isPermissionGranted,));
+            return fadeTransition(HomeScreen(usagePermission: _usagePermission, accessibilityPermission: _accessibilityPermission));
           case '/goals':
             return fadeTransition(GoalsPage());
           case '/tasks':
@@ -94,9 +97,12 @@ class _MyAppState extends State<MyApp> {
             return fadeTransition(InstalledAppsPage());
           case '/penalties':
             startForegroundService();
-            return fadeTransition(HomeScreen(isPermissionGranted: true,));
+            return fadeTransition(HomeScreen(usagePermission: true, accessibilityPermission: true));
+          case '/test':
+            stopForegroundService();
+            return fadeTransition(HomeScreen(usagePermission: true, accessibilityPermission: true));
           default:
-            return fadeTransition(HomeScreen(isPermissionGranted: _isPermissionGranted,)); // Fallback if route not found
+            return fadeTransition(HomeScreen(usagePermission: _usagePermission, accessibilityPermission: _accessibilityPermission)); // Fallback if route not found
         }
       },
     );

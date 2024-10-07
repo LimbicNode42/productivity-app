@@ -5,9 +5,10 @@ import 'package:flutter_app/ui_components/buttons.dart';
 import 'package:flutter_app/permissions/barrel.dart';
 
 class HomeScreen extends StatefulWidget {
-  final bool isPermissionGranted;
+  final bool usagePermission;
+  final bool accessibilityPermission;
 
-  const HomeScreen({Key? key, required this.isPermissionGranted}) : super(key: key);
+  const HomeScreen({Key? key, required this.usagePermission, required this.accessibilityPermission}) : super(key: key);
 
   @override
   _HomeScreenState createState() => _HomeScreenState();
@@ -19,9 +20,14 @@ class _HomeScreenState extends State<HomeScreen> {
     super.initState();
     // Show permission dialog only once in initState
     // TODO: going to need to retrigger this if not allowed when accessing data
-    if (!widget.isPermissionGranted) {
+    if (!widget.usagePermission) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         showUsageAccessDialog(context);
+      });
+    }
+    if (!widget.accessibilityPermission) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        showAccessibilityDialog(context);
       });
     }
   }
@@ -76,6 +82,7 @@ class _HomeScreenState extends State<HomeScreen> {
             NavButton(title: 'Goals', onPress: () => Navigator.pushNamed(context, '/goals')),
             NavButton(title: 'Alerts', onPress: () => Navigator.pushNamed(context, '/installed_apps')), //TODO: change to right page
             NavButton(title: 'Penalties', onPress: () => Navigator.pushNamed(context, '/penalties')), //TODO: change to right page
+            NavButton(title: 'Test', onPress: () => Navigator.pushNamed(context, '/test')), //TODO: change to right page
           ],
         ),
       ),

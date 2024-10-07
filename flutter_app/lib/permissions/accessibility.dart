@@ -7,7 +7,7 @@ import 'dart:io';
 
 import 'package:flutter_app/singletons/android.dart';
 
-Future<bool> checkUsageStatsPermission() async {
+Future<bool> checkAccessibilityPermission() async {
   final deviceInfo = DeviceInfoPlugin();
 
   if (Platform.isAndroid) {
@@ -28,7 +28,7 @@ Future<bool> checkUsageStatsPermission() async {
 
 Future<bool> _checkNativePermissionStatus() async {
   try {
-    final bool isGranted = await androidChannel.invokeMethod('checkUsageStatsPermission');
+    final bool isGranted = await androidChannel.invokeMethod('checkAccessibilityPermission');
     return isGranted;
   } on PlatformException catch (e) {
     print("Failed to check permission status: ${e.message}");
@@ -37,22 +37,23 @@ Future<bool> _checkNativePermissionStatus() async {
 }
 
 
-// Function to prompt user to enable usage stats permission
-Future<void> _requestUsageStatsPermission() async {
-  final intent = AndroidIntent(
-    action: 'android.settings.USAGE_ACCESS_SETTINGS',
-  );
-  intent.launch();
+// Function to prompt user to enable accessibility permission
+Future<void> _requestAccessibilityPermission() async {
+  try {
+    await androidChannel.invokeMethod('openAccessibilitySettings');
+  } catch (e) {
+    print("Failed accessibility intent");
+  }
 }
 
 // Function to show a custom dialog before opening settings
-void showUsageAccessDialog(BuildContext context) {
+void showAccessibilityDialog(BuildContext context) {
   showDialog(
     context: context,
     builder: (context) => AlertDialog(
-      title: Text('Usage Permission Required'),
+      title: Text('Accessibility Permission Required'),
       content: Text(
-        'To track app usage, we need access to your usage data. Please enable usage access for this app in the next screen.',
+        'To track app usage, we need access to your accessibility settings. Please enable accessibility access for this app in the next screen.',
       ),
       actions: [
         TextButton(
@@ -62,7 +63,7 @@ void showUsageAccessDialog(BuildContext context) {
         TextButton(
           onPressed: () {
             Navigator.of(context).pop(); // Dismiss dialog
-            _requestUsageStatsPermission(); // Open settings
+            _requestAccessibilityPermission(); // Open settings
           },
           child: Text('Open Settings'),
         ),
