@@ -2,6 +2,8 @@
 import 'package:flutter_app/permissions/barrel.dart';
 import 'package:flutter_foreground_task/flutter_foreground_task.dart';
 
+import 'package:flutter_app/notifications/app_open.dart';
+
 @pragma('vm:entry-point')
 void startCallback() {
   // The setTaskHandler function must be called to handle the task in the background.
@@ -38,6 +40,13 @@ class MyTaskHandler extends TaskHandler {
   @override
   void onReceiveData(Object data) {
     print('onReceiveData: $data');
+      
+    // Display a notification
+    _pushNotification(data.toString());
+  }
+
+  Future<void> _pushNotification(String message) async {
+    await pushNotification(message);
   }
 
   // Called when the notification button is pressed.

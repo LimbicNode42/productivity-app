@@ -8,7 +8,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter/material.dart';
 
 import 'package:flutter_app/daemonish/handlers.dart';
-import 'package:flutter_app/notifications/foreground_options.dart';
+import 'package:flutter_app/notifications/config.dart';
 import 'package:flutter_app/permissions/barrel.dart';
 import 'package:flutter_app/models/goals.dart';
 import 'package:flutter_app/dao/goals.dart';
