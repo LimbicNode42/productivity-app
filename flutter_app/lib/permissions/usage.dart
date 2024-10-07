@@ -5,6 +5,8 @@ import 'package:device_info_plus/device_info_plus.dart';
 import 'package:android_intent_plus/android_intent.dart';
 import 'dart:io';
 
+import 'package:flutter_app/singletons/android.dart';
+
 Future<bool> checkUsageStatsPermission() async {
   final deviceInfo = DeviceInfoPlugin();
 
@@ -25,10 +27,8 @@ Future<bool> checkUsageStatsPermission() async {
 }
 
 Future<bool> _checkNativePermissionStatus() async {
-  const platform = MethodChannel('com.example/usage_permission');
-
   try {
-    final bool isGranted = await platform.invokeMethod('checkUsageStatsPermission');
+    final bool isGranted = await androidChannel.invokeMethod('checkUsageStatsPermission');
     return isGranted;
   } on PlatformException catch (e) {
     print("Failed to check permission status: ${e.message}");
