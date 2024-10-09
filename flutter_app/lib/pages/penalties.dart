@@ -20,21 +20,29 @@ class _PenaltiesScreenState extends State<PenaltiesScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.start,
           children: [
-            // Features title
-            Text(
-              'Penalties',
-              style: TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
+            Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: [
+                  // Features title
+                  Text(
+                    'Penalties',
+                    style: TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  SizedBox(height: 20), // Space between title and buttons
+                  
+                  // Buttons
+                  NavButton(title: 'Blocked Apps', onPress: () => Navigator.pushNamed(context, '/blocked_apps')),
+                ],
               ),
             ),
-            SizedBox(height: 20), // Space between title and buttons
-            
-            // Buttons
-            NavButton(title: 'Blocked Apps', onPress: () => Navigator.pushNamed(context, '/blocked_apps')),
-          ],
-        ),
-      ),
+          ]
+        )
+      )
     );
   }
 }

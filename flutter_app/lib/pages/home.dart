@@ -5,10 +5,10 @@ import 'package:flutter_app/ui_components/buttons.dart';
 import 'package:flutter_app/permissions/barrel.dart';
 
 class HomeScreen extends StatefulWidget {
-  final bool usagePermission;
-  final bool accessibilityPermission;
+  // final bool usagePermission;
+  // final bool accessibilityPermission;
 
-  const HomeScreen({Key? key, required this.usagePermission, required this.accessibilityPermission}) : super(key: key);
+  const HomeScreen({Key? key}) : super(key: key);
 
   @override
   _HomeScreenState createState() => _HomeScreenState();
@@ -20,21 +20,19 @@ class _HomeScreenState extends State<HomeScreen> {
     super.initState();
     // Show permission dialog only once in initState
     // TODO: going to need to retrigger this if not allowed when accessing data
-    if (!widget.usagePermission) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        showUsageAccessDialog(context);
-      });
-    }
-    if (!widget.accessibilityPermission) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        showAccessibilityDialog(context);
-      });
-    }
+    // if (!widget.usagePermission) {
+    //   WidgetsBinding.instance.addPostFrameCallback((_) {
+    //     showUsageAccessDialog(context);
+    //   });
+    // }
+    // Use addPostFrameCallback to run after the first frame
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      checkAccessibilityPermission(context);
+    });
   }
 
   @override
   Widget build(BuildContext context) {
-
     return Scaffold(
       appBar: MyCustomAppBar(),
       body: Padding(

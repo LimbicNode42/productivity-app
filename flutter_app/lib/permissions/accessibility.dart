@@ -7,7 +7,7 @@ import 'dart:io';
 
 import 'package:flutter_app/singletons/android.dart';
 
-Future<bool> checkAccessibilityPermission() async {
+void checkAccessibilityPermission(BuildContext context) async {
   final deviceInfo = DeviceInfoPlugin();
 
   if (Platform.isAndroid) {
@@ -16,29 +16,29 @@ Future<bool> checkAccessibilityPermission() async {
     // Check if SDK version is 23 or higher
     if (androidInfo.version.sdkInt >= 21) {
       // Check if permission is already granted
-      bool isGranted = await _checkNativePermissionStatus();
-      return isGranted;
+      _checkNativePermissionStatus(context);
     } else {
       print("Android version not current enough");
     }
+  } else {
+    print("Fuck off");
   }
-
-  return false;
 }
 
-Future<bool> _checkNativePermissionStatus() async {
+void _checkNativePermissionStatus(BuildContext context) async {
   try {
     final bool isGranted = await androidChannel.invokeMethod('checkAccessibilityPermission');
-    return isGranted;
+    if (!isGranted) {
+      _showAccessibilityDialog(context);
+    }
   } on PlatformException catch (e) {
     print("Failed to check permission status: ${e.message}");
-    return false;
   }
 }
 
 
 // Function to prompt user to enable accessibility permission
-Future<void> _requestAccessibilityPermission() async {
+void _requestAccessibilityPermission() async {
   try {
     await androidChannel.invokeMethod('openAccessibilitySettings');
   } catch (e) {
@@ -47,7 +47,7 @@ Future<void> _requestAccessibilityPermission() async {
 }
 
 // Function to show a custom dialog before opening settings
-void showAccessibilityDialog(BuildContext context) {
+void _showAccessibilityDialog(BuildContext context) {
   showDialog(
     context: context,
     builder: (context) => AlertDialog(
