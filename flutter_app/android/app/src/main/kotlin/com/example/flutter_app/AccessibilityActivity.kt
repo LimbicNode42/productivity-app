@@ -15,19 +15,33 @@ import com.pravera.flutter_foreground_task.service.ForegroundService
 
 class MyAccessibilityService : AccessibilityService() {
     private val TAG = "AppMonitor"
-    private val YOUTUBE_PACKAGE_NAME = "com.google.android.youtube"
+    private var blockedPackageNames = mutableListOf<String>()
+
+    companion object {
+        private var instance: MyAccessibilityService? = null
+
+        fun updateBlockedPackages(packages: List<String>) {
+            instance?.blockedPackageNames?.clear()
+            instance?.blockedPackageNames?.addAll(packages)
+        }
+    }
+
+    override fun onCreate() {
+        super.onCreate()
+        instance = this
+    }
 
     override fun onAccessibilityEvent(event: AccessibilityEvent?) {
         if (event?.eventType == AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED) {
             val packageName = event.packageName?.toString()
             Log.d(TAG, "App Opened: ${packageName}")
 
-            // Check if the YouTube app is in the foreground
-            if (packageName == YOUTUBE_PACKAGE_NAME) {
-                Log.d(TAG, "YouTube App Opened")
+            // Check if the app is in the list of blocked package names.
+            if (blockedPackageNames.contains(packageName)) {
+                Log.d(TAG, "$packageName is blocked")
 
                 // Send data to the foreground service using FlutterForegroundTask
-                sendEventToForegroundService("YouTube Opened")
+                sendEventToForegroundService("$packageName Opened")
             }
         }
     }

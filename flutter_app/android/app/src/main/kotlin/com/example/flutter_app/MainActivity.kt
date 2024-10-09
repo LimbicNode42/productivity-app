@@ -15,6 +15,7 @@ import io.flutter.plugin.common.MethodChannel
 
 class MainActivity: FlutterActivity() {
     private val CHANNEL = "com.example/android_native"
+    private var blockedPackageNames = mutableListOf<String>()
 
     override fun configureFlutterEngine(@NonNull flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
@@ -28,6 +29,16 @@ class MainActivity: FlutterActivity() {
                 result.success(isGranted)
             } else if (call.method == "openAccessibilitySettings") {
                 openAccessibilitySettings()
+                result.success(null)
+            } else if (call.method == "setBlockedPackages") {
+                // Receive the list of blocked package names from Flutter.
+                val packages = call.arguments<List<String>>() ?: emptyList()
+                blockedPackageNames.clear()
+                blockedPackageNames.addAll(packages)
+
+                // Optionally, you can send this list to the Accessibility Service.
+                MyAccessibilityService.updateBlockedPackages(blockedPackageNames)
+
                 result.success(null)
             } else {
                 result.notImplemented()
