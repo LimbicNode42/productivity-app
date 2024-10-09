@@ -2,3 +2,5 @@
 
 export 'home.dart';
 export 'goals.dart';
+export 'penalties.dart';
+export 'blocked_apps.dart';

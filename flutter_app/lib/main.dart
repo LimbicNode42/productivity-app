@@ -1,6 +1,10 @@
 // main.dart
+import 'package:flutter_app/dao/blocked_apps.dart';
+import 'package:flutter_app/models/blocked_apps.dart';
 import 'package:flutter_app/pages/installed_apps.dart';
+import 'package:flutter_app/pages/penalties.dart';
 import 'package:flutter_app/pages/tasks.dart';
+import 'package:flutter_app/state_managers/blocked_apps.dart';
 import 'package:flutter_foreground_task/flutter_foreground_task.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:isar/isar.dart';
@@ -18,6 +22,7 @@ import 'package:flutter_app/dao/tasks.dart';
 import 'package:flutter_app/state_managers/tasks.dart';
 import 'package:flutter_app/ui_components/transitions.dart';
 import 'package:flutter_app/pages/barrel.dart';
+import 'package:flutter_app/models/blocked_apps.dart';
 
 //This function triggers the build process
 void main() async {
@@ -27,13 +32,21 @@ void main() async {
   FlutterForegroundTask.initCommunicationPort();
 
   final dir = await getApplicationDocumentsDirectory();
-  final isar = await Isar.open([GoalSchema, TaskSchema], directory: dir.path); // Replace GoalSchema with your schema
+  final isar = await Isar.open(
+    [
+      GoalSchema, 
+      TaskSchema, 
+      BlockedAppSchema
+    ], 
+    directory: dir.path
+  ); // Replace GoalSchema with your schema
 
   runApp(
     ProviderScope(
       overrides: [
         goalDaoProvider.overrideWithValue(GoalDao(isar)),
         taskDaoProvider.overrideWithValue(TaskDao(isar)),
+        blockedAppDaoProvider.overrideWithValue(BlockedAppDao(isar)),
       ],
       child: MyApp(
         // isPermissionGranted: isPermissionGranted
@@ -93,11 +106,13 @@ class _MyAppState extends State<MyApp> {
           case '/tasks':
             final args = settings.arguments as Map<String, dynamic>;
             return fadeTransition(TasksPage(goalId: args['goalId']));
-          case '/installed_apps':
-            return fadeTransition(InstalledAppsPage());
           case '/penalties':
-            startForegroundService();
-            return fadeTransition(HomeScreen(usagePermission: true, accessibilityPermission: true));
+            return fadeTransition(PenaltiesScreen());
+          case '/blocked_apps':
+            return fadeTransition(BlockedAppsPage());
+          // case '/penalties':
+          //   startForegroundService();
+          //   return fadeTransition(HomeScreen(usagePermission: true, accessibilityPermission: true));
           case '/test':
             stopForegroundService();
             return fadeTransition(HomeScreen(usagePermission: true, accessibilityPermission: true));
