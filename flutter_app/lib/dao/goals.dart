@@ -12,6 +12,10 @@ class GoalDao {
     return await _isar.goals.where().findAll();
   }
 
+  Future<List<Goal>> getAllGoalsForCategory(int categoryId) async {
+    return await _isar.goals.filter().categoryIdEqualTo(categoryId).findAll();
+  }
+
   // Add a goal
   Future<void> addGoal(Goal goal) async {
     await _isar.writeTxn(() async {

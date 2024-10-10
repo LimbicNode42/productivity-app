@@ -77,7 +77,7 @@ class _HomeScreenState extends State<HomeScreen> {
             SizedBox(height: 20), // Space between title and buttons
             
             // Buttons
-            NavButton(title: 'Goals', onPress: () => Navigator.pushNamed(context, '/goals')),
+            NavButton(title: 'Goals', onPress: () => Navigator.pushNamed(context, '/goal_categories')),
             NavButton(title: 'Alerts', onPress: () => Navigator.pushNamed(context, '/installed_apps')), //TODO: change to right page
             NavButton(title: 'Penalties', onPress: () => Navigator.pushNamed(context, '/penalties')), //TODO: change to right page
             NavButton(title: 'Test', onPress: () => Navigator.pushNamed(context, '/test')), //TODO: change to right page

@@ -17,8 +17,13 @@ const GoalSchema = CollectionSchema(
   name: r'Goal',
   id: 4693499363663894908,
   properties: {
-    r'title': PropertySchema(
+    r'categoryId': PropertySchema(
       id: 0,
+      name: r'categoryId',
+      type: IsarType.long,
+    ),
+    r'title': PropertySchema(
+      id: 1,
       name: r'title',
       type: IsarType.string,
     )
@@ -28,7 +33,21 @@ const GoalSchema = CollectionSchema(
   deserialize: _goalDeserialize,
   deserializeProp: _goalDeserializeProp,
   idName: r'id',
-  indexes: {},
+  indexes: {
+    r'categoryId': IndexSchema(
+      id: -8798048739239305339,
+      name: r'categoryId',
+      unique: false,
+      replace: false,
+      properties: [
+        IndexPropertySchema(
+          name: r'categoryId',
+          type: IndexType.value,
+          caseSensitive: false,
+        )
+      ],
+    )
+  },
   links: {},
   embeddedSchemas: {},
   getId: _goalGetId,
@@ -53,7 +72,8 @@ void _goalSerialize(
   List<int> offsets,
   Map<Type, List<int>> allOffsets,
 ) {
-  writer.writeString(offsets[0], object.title);
+  writer.writeLong(offsets[0], object.categoryId);
+  writer.writeString(offsets[1], object.title);
 }
 
 Goal _goalDeserialize(
@@ -63,8 +83,9 @@ Goal _goalDeserialize(
   Map<Type, List<int>> allOffsets,
 ) {
   final object = Goal();
+  object.categoryId = reader.readLong(offsets[0]);
   object.id = id;
-  object.title = reader.readString(offsets[0]);
+  object.title = reader.readString(offsets[1]);
   return object;
 }
 
@@ -76,6 +97,8 @@ P _goalDeserializeProp<P>(
 ) {
   switch (propertyId) {
     case 0:
+      return (reader.readLong(offset)) as P;
+    case 1:
       return (reader.readString(offset)) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
@@ -98,6 +121,14 @@ extension GoalQueryWhereSort on QueryBuilder<Goal, Goal, QWhere> {
   QueryBuilder<Goal, Goal, QAfterWhere> anyId() {
     return QueryBuilder.apply(this, (query) {
       return query.addWhereClause(const IdWhereClause.any());
+    });
+  }
+
+  QueryBuilder<Goal, Goal, QAfterWhere> anyCategoryId() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addWhereClause(
+        const IndexWhereClause.any(indexName: r'categoryId'),
+      );
     });
   }
 }
@@ -167,9 +198,151 @@ extension GoalQueryWhere on QueryBuilder<Goal, Goal, QWhereClause> {
       ));
     });
   }
+
+  QueryBuilder<Goal, Goal, QAfterWhereClause> categoryIdEqualTo(
+      int categoryId) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addWhereClause(IndexWhereClause.equalTo(
+        indexName: r'categoryId',
+        value: [categoryId],
+      ));
+    });
+  }
+
+  QueryBuilder<Goal, Goal, QAfterWhereClause> categoryIdNotEqualTo(
+      int categoryId) {
+    return QueryBuilder.apply(this, (query) {
+      if (query.whereSort == Sort.asc) {
+        return query
+            .addWhereClause(IndexWhereClause.between(
+              indexName: r'categoryId',
+              lower: [],
+              upper: [categoryId],
+              includeUpper: false,
+            ))
+            .addWhereClause(IndexWhereClause.between(
+              indexName: r'categoryId',
+              lower: [categoryId],
+              includeLower: false,
+              upper: [],
+            ));
+      } else {
+        return query
+            .addWhereClause(IndexWhereClause.between(
+              indexName: r'categoryId',
+              lower: [categoryId],
+              includeLower: false,
+              upper: [],
+            ))
+            .addWhereClause(IndexWhereClause.between(
+              indexName: r'categoryId',
+              lower: [],
+              upper: [categoryId],
+              includeUpper: false,
+            ));
+      }
+    });
+  }
+
+  QueryBuilder<Goal, Goal, QAfterWhereClause> categoryIdGreaterThan(
+    int categoryId, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addWhereClause(IndexWhereClause.between(
+        indexName: r'categoryId',
+        lower: [categoryId],
+        includeLower: include,
+        upper: [],
+      ));
+    });
+  }
+
+  QueryBuilder<Goal, Goal, QAfterWhereClause> categoryIdLessThan(
+    int categoryId, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addWhereClause(IndexWhereClause.between(
+        indexName: r'categoryId',
+        lower: [],
+        upper: [categoryId],
+        includeUpper: include,
+      ));
+    });
+  }
+
+  QueryBuilder<Goal, Goal, QAfterWhereClause> categoryIdBetween(
+    int lowerCategoryId,
+    int upperCategoryId, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addWhereClause(IndexWhereClause.between(
+        indexName: r'categoryId',
+        lower: [lowerCategoryId],
+        includeLower: includeLower,
+        upper: [upperCategoryId],
+        includeUpper: includeUpper,
+      ));
+    });
+  }
 }
 
 extension GoalQueryFilter on QueryBuilder<Goal, Goal, QFilterCondition> {
+  QueryBuilder<Goal, Goal, QAfterFilterCondition> categoryIdEqualTo(int value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'categoryId',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<Goal, Goal, QAfterFilterCondition> categoryIdGreaterThan(
+    int value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'categoryId',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<Goal, Goal, QAfterFilterCondition> categoryIdLessThan(
+    int value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'categoryId',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<Goal, Goal, QAfterFilterCondition> categoryIdBetween(
+    int lower,
+    int upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'categoryId',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+      ));
+    });
+  }
+
   QueryBuilder<Goal, Goal, QAfterFilterCondition> idEqualTo(Id value) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.equalTo(
@@ -356,6 +529,18 @@ extension GoalQueryObject on QueryBuilder<Goal, Goal, QFilterCondition> {}
 extension GoalQueryLinks on QueryBuilder<Goal, Goal, QFilterCondition> {}
 
 extension GoalQuerySortBy on QueryBuilder<Goal, Goal, QSortBy> {
+  QueryBuilder<Goal, Goal, QAfterSortBy> sortByCategoryId() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'categoryId', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Goal, Goal, QAfterSortBy> sortByCategoryIdDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'categoryId', Sort.desc);
+    });
+  }
+
   QueryBuilder<Goal, Goal, QAfterSortBy> sortByTitle() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'title', Sort.asc);
@@ -370,6 +555,18 @@ extension GoalQuerySortBy on QueryBuilder<Goal, Goal, QSortBy> {
 }
 
 extension GoalQuerySortThenBy on QueryBuilder<Goal, Goal, QSortThenBy> {
+  QueryBuilder<Goal, Goal, QAfterSortBy> thenByCategoryId() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'categoryId', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Goal, Goal, QAfterSortBy> thenByCategoryIdDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'categoryId', Sort.desc);
+    });
+  }
+
   QueryBuilder<Goal, Goal, QAfterSortBy> thenById() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'id', Sort.asc);
@@ -396,6 +593,12 @@ extension GoalQuerySortThenBy on QueryBuilder<Goal, Goal, QSortThenBy> {
 }
 
 extension GoalQueryWhereDistinct on QueryBuilder<Goal, Goal, QDistinct> {
+  QueryBuilder<Goal, Goal, QDistinct> distinctByCategoryId() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'categoryId');
+    });
+  }
+
   QueryBuilder<Goal, Goal, QDistinct> distinctByTitle(
       {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
@@ -408,6 +611,12 @@ extension GoalQueryProperty on QueryBuilder<Goal, Goal, QQueryProperty> {
   QueryBuilder<Goal, int, QQueryOperations> idProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'id');
+    });
+  }
+
+  QueryBuilder<Goal, int, QQueryOperations> categoryIdProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'categoryId');
     });
   }
 

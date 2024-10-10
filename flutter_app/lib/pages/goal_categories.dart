@@ -1,63 +1,56 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import 'package:flutter_app/models/goals.dart';
-import 'package:flutter_app/state_managers/goals.dart';
 import 'package:flutter_app/ui_components/app_bar.dart';
 import 'package:flutter_app/ui_components/buttons.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_app/state_managers/goal_categories.dart';
+import 'package:flutter_app/models/goal_categories.dart';
 
-class GoalsPage extends ConsumerStatefulWidget {
-  final int categoryId;
-
-  const GoalsPage({Key? key, required this.categoryId});
+class GoalCategoriesScreen extends ConsumerWidget {
+  const GoalCategoriesScreen({Key? key}) : super(key: key);
 
   @override
-  ConsumerState<GoalsPage> createState() => _GoalsPageState();
-}
-
-class _GoalsPageState extends ConsumerState<GoalsPage> {
-  @override
-  Widget build(BuildContext context) {
-    final goalNotifier = ref.watch(goalNotifierProvider(widget.categoryId).notifier); // Watch notifier for loading state
-    final goals = ref.watch(goalNotifierProvider(widget.categoryId)); // Watch goals list
+  Widget build(BuildContext context, WidgetRef ref) {
+    final goalCategoryNotifier = ref.watch(goalCategoryNotifierProvider.notifier); // Watch notifier for loading state
+    final goalCategory = ref.watch(goalCategoryNotifierProvider); // Watch goals list
     
     return Scaffold(
       appBar: MyCustomAppBar(),
-      body: goalNotifier.isLoading ? Center(child: CircularProgressIndicator()) // Show loading indicator
-          : goals.isEmpty ? Center(child: Text('Click the + to add a goal'))
+      body: goalCategoryNotifier.isLoading ? Center(child: CircularProgressIndicator()) // Show loading indicator
+          : goalCategory.isEmpty ? Center(child: Text('Click the + to add a goal'))
           : ListView.builder(
-            itemCount: goals.length,
+            itemCount: goalCategory.length,
             itemBuilder: (context, index) {
-              final goal = goals[index];
+              final category = goalCategory[index];
               return Padding(
                 padding: const EdgeInsets.all(8.0),
                 child: NavButton(
-                  title: goal.title,
-                  onPress: () => Navigator.pushNamed(context, '/tasks', arguments: {'goalId': goal.id}),
-                  onLongPress: () => _showGoalOptionsDialog(context, goal), // Open options dialog
+                  title: category.title,
+                  onPress: () => Navigator.pushNamed(context, '/goals', arguments: {'categoryId': category.id}),
+                  onLongPress: () => _showGoalCategoryOptionsDialog(context, ref, category), // Open options dialog
                 )
               );
             },
           ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () => _showAddGoalDialog(context), // Open add goal dialog
+        onPressed: () => _showAddGoalCategoryDialog(context, ref), // Open add goal dialog
         child: Icon(Icons.add),
       ),
     );
   }
 
-  void _showAddGoalDialog(BuildContext context) {
+  void _showAddGoalCategoryDialog(BuildContext context, WidgetRef ref) {
     final TextEditingController titleController = TextEditingController();
 
     showDialog(
       context: context,
       builder: (context) {
         return AlertDialog(
-          title: Text('Add New Goal'),
+          title: Text('Add New Category'),
           content: TextField(
             controller: titleController,
             decoration: InputDecoration(
-              hintText: 'Enter goal title',
+              hintText: 'Enter category title',
             ),
           ),
           actions: [
@@ -67,11 +60,9 @@ class _GoalsPageState extends ConsumerState<GoalsPage> {
             ),
             TextButton(
               onPressed: () {
-                final newGoal = Goal()
-                  ..title = titleController.text.trim()
-                  ..categoryId = widget.categoryId;
-                if (newGoal.title.isNotEmpty) {
-                  ref.read(goalNotifierProvider(widget.categoryId).notifier).addGoal(newGoal); // Add new goal to state
+                final newCategory = GoalCategory()..title = titleController.text.trim();
+                if (newCategory.title.isNotEmpty) {
+                  ref.read(goalCategoryNotifierProvider.notifier).addGoalCategory(newCategory); // Add new goal to state
                 }
                 Navigator.of(context).pop(); // Close dialog
               },
@@ -83,13 +74,13 @@ class _GoalsPageState extends ConsumerState<GoalsPage> {
     );
   }
 
-  void _showGoalOptionsDialog(BuildContext context, Goal goal) {
+  void _showGoalCategoryOptionsDialog(BuildContext context, WidgetRef ref, GoalCategory goalCategory) {
     showDialog(
       context: context,
       builder: (context) {
         return AlertDialog(
           title: Text('Goal Options'),
-          content: Text('What would you like to do with "${goal.title}"?'),
+          content: Text('What would you like to do with "${goalCategory.title}"?'),
           actions: [
             TextButton(
               onPressed: () => Navigator.of(context).pop(), // Close dialog
@@ -98,14 +89,14 @@ class _GoalsPageState extends ConsumerState<GoalsPage> {
             TextButton(
               onPressed: () {
                 Navigator.of(context).pop(); // Close the options dialog
-                _showEditGoalDialog(context, goal); // Open the edit dialog
+                _showEditGoalCategoryDialog(context, ref, goalCategory); // Open the edit dialog
               },
               child: Text('Edit'),
             ),
             TextButton(
               onPressed: () {
                 Navigator.of(context).pop(); // Close the options dialog
-                _showDeleteConfirmationDialog(context, goal); // Confirm deletion
+                _showDeleteConfirmationDialog(context, ref, goalCategory); // Confirm deletion
               },
               child: Text('Delete'),
             ),
@@ -115,14 +106,14 @@ class _GoalsPageState extends ConsumerState<GoalsPage> {
     );
   }
 
-  void _showEditGoalDialog(BuildContext context, Goal goal) {
-    final TextEditingController editController = TextEditingController(text: goal.title);
+  void _showEditGoalCategoryDialog(BuildContext context, WidgetRef ref, GoalCategory goalCategory) {
+    final TextEditingController editController = TextEditingController(text: goalCategory.title);
 
     showDialog(
       context: context,
       builder: (context) {
         return AlertDialog(
-          title: Text('Edit Goal'),
+          title: Text('Edit Category'),
           content: TextField(
             controller: editController,
             decoration: InputDecoration(
@@ -138,8 +129,8 @@ class _GoalsPageState extends ConsumerState<GoalsPage> {
               onPressed: () {
                 final updatedTitle = editController.text.trim();
                 if (updatedTitle.isNotEmpty) {
-                  final updatedGoal = goal..title = updatedTitle;
-                  ref.read(goalNotifierProvider(widget.categoryId).notifier).updateGoal(updatedGoal); // Update goal in state
+                  final updatedCategory = goalCategory..title = updatedTitle;
+                  ref.read(goalCategoryNotifierProvider.notifier).updateGoalCategory(updatedCategory); // Update goal in state
                 }
                 Navigator.of(context).pop(); // Close dialog
               },
@@ -152,13 +143,13 @@ class _GoalsPageState extends ConsumerState<GoalsPage> {
   }
 
   // Show confirmation dialog to delete a goal
-  void _showDeleteConfirmationDialog(BuildContext context, Goal goal) {
+  void _showDeleteConfirmationDialog(BuildContext context, WidgetRef ref, GoalCategory goalCategory) {
     showDialog(
       context: context,
       builder: (context) {
         return AlertDialog(
-          title: Text('Delete Goal'),
-          content: Text('Are you sure you want to delete "${goal.title}"?'),
+          title: Text('Delete Category'),
+          content: Text('Are you sure you want to delete "${goalCategory.title}"?'),
           actions: [
             TextButton(
               onPressed: () => Navigator.of(context).pop(), // Close dialog without deleting
@@ -166,7 +157,7 @@ class _GoalsPageState extends ConsumerState<GoalsPage> {
             ),
             TextButton(
               onPressed: () {
-                ref.read(goalNotifierProvider(widget.categoryId).notifier).deleteGoal(goal.id); // Confirm and delete goal
+                ref.read(goalCategoryNotifierProvider.notifier).deleteGoalCategory(goalCategory.id); // Confirm and delete goal
                 Navigator.of(context).pop(); // Close dialog
               },
               child: Text('Delete'),

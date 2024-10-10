@@ -1,12 +1,9 @@
 import 'package:isar/isar.dart';
 
-part 'goals.g.dart';
+part 'goal_categories.g.dart';
 
 @Collection()
-class Goal {
+class GoalCategory {
   Id id = Isar.autoIncrement; // auto-incremented ID
   late String title;
-
-  @Index()
-  late int categoryId;
 }

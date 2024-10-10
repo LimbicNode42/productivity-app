@@ -10,27 +10,28 @@ final goalDaoProvider = Provider<GoalDao>((ref) {
 });
 
 // A StateNotifierProvider to handle the list of goals
-final goalsProvider = FutureProvider<List<Goal>>((ref) async {
+final goalsProvider = FutureProvider.family<List<Goal>, int>((ref, categoryId) async {
   final goalRepo = ref.read(goalDaoProvider);
-  return await goalRepo.getAllGoals();
+  return await goalRepo.getAllGoalsForCategory(categoryId);
 });
 
-final goalNotifierProvider = StateNotifierProvider<GoalNotifier, List<Goal>>((ref) {
+final goalNotifierProvider = StateNotifierProvider.family<GoalNotifier, List<Goal>, int>((ref, categoryId) {
   final goalDao = ref.read(goalDaoProvider);
-  return GoalNotifier(goalDao);
+  return GoalNotifier(goalDao, categoryId);
 });
 
 class GoalNotifier extends StateNotifier<List<Goal>> {
   final GoalDao goalDao;
   bool isLoading = true; // Add loading state
+  final int categoryId;
 
-  GoalNotifier(this.goalDao) : super([]) {
+  GoalNotifier(this.goalDao, this.categoryId) : super([]) {
     loadGoals();
   }
 
   Future<void> loadGoals() async {
     isLoading = true; // Set loading state to true
-    final goals = await goalDao.getAllGoals();
+    final goals = await goalDao.getAllGoalsForCategory(categoryId);
     state = goals;
     isLoading = false; // Set loading state to false
   }

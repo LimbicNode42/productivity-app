@@ -1,10 +1,13 @@
 // main.dart
 import 'package:flutter_app/dao/blocked_apps.dart';
+import 'package:flutter_app/dao/goal_categories.dart';
 import 'package:flutter_app/models/blocked_apps.dart';
+import 'package:flutter_app/models/goal_categories.dart';
 import 'package:flutter_app/pages/installed_apps.dart';
 import 'package:flutter_app/pages/penalties.dart';
 import 'package:flutter_app/pages/tasks.dart';
 import 'package:flutter_app/state_managers/blocked_apps.dart';
+import 'package:flutter_app/state_managers/goal_categories.dart';
 import 'package:flutter_foreground_task/flutter_foreground_task.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:isar/isar.dart';
@@ -31,22 +34,24 @@ void main() async {
   // Initialize port for communication between TaskHandler and UI.
   FlutterForegroundTask.initCommunicationPort();
 
-  final dir = await getApplicationDocumentsDirectory();
-  final isar = await Isar.open(
+  final _dir = await getApplicationDocumentsDirectory();
+  final _isar = await Isar.open(
     [
+      GoalCategorySchema,
       GoalSchema, 
       TaskSchema, 
       BlockedAppSchema
     ], 
-    directory: dir.path
+    directory: _dir.path
   ); // Replace GoalSchema with your schema
 
   runApp(
     ProviderScope(
       overrides: [
-        goalDaoProvider.overrideWithValue(GoalDao(isar)),
-        taskDaoProvider.overrideWithValue(TaskDao(isar)),
-        blockedAppDaoProvider.overrideWithValue(BlockedAppDao(isar)),
+        goalCategoryDaoProvider.overrideWithValue(GoalCategoryDao(_isar)),
+        goalDaoProvider.overrideWithValue(GoalDao(_isar)),
+        taskDaoProvider.overrideWithValue(TaskDao(_isar)),
+        blockedAppDaoProvider.overrideWithValue(BlockedAppDao(_isar)),
       ],
       child: MyApp(
         // isPermissionGranted: isPermissionGranted
@@ -85,8 +90,11 @@ class _MyAppState extends State<MyApp> {
         switch (settings.name) {
           case '/home':
             return fadeTransition(HomeScreen());
+          case '/goal_categories':
+            return fadeTransition(GoalCategoriesScreen());
           case '/goals':
-            return fadeTransition(GoalsPage());
+            final args = settings.arguments as Map<String, dynamic>;
+            return fadeTransition(GoalsPage(categoryId: args['categoryId']));
           case '/tasks':
             final args = settings.arguments as Map<String, dynamic>;
             return fadeTransition(TasksPage(goalId: args['goalId']));
