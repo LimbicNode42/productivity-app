@@ -120,8 +120,11 @@ class _BlockedAppsState extends ConsumerState<BlockedAppsPage> {
                             },
                           ),
                           onTap: () {
-                            // Action when the app is tapped
-                            print('Tapped on ${app.name}');
+                            // Toggle the value when the row is tapped
+                            setState(() {
+                              isBlocked = !isBlocked;
+                              _toggleBlockedApp(app, isBlocked);
+                            });
                           },
                         );
                       },
@@ -131,5 +134,19 @@ class _BlockedAppsState extends ConsumerState<BlockedAppsPage> {
               ),
             ),
     );
+  }
+
+  // Add a separate function to handle the logic of adding or removing the blocked app
+  void _toggleBlockedApp(AppInfo app, bool value) {
+    setState(() {
+      if (value) {
+        final newBlockedApp = BlockedApp()
+          ..name = app.name
+          ..packageName = app.packageName;
+        ref.read(blockedAppNotifierProvider.notifier).addBlockedApp(newBlockedApp);
+      } else {
+        ref.read(blockedAppNotifierProvider.notifier).removeBlockedAppsByPackageName(app.packageName);
+      }
+    });
   }
 }
