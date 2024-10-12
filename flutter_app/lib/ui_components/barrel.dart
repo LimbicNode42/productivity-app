@@ -3,3 +3,4 @@
 export 'app_bar.dart';
 export 'buttons.dart';
 export 'transitions.dart';
+export 'recurrence_dialog.dart';

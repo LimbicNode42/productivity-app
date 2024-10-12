@@ -4,7 +4,7 @@ import 'package:intl/intl.dart';
 
 import 'package:flutter_app/models/tasks.dart';
 import 'package:flutter_app/state_managers/tasks.dart';
-import 'package:flutter_app/ui_components/app_bar.dart'; // Will be need for todos
+import 'package:flutter_app/ui_components/barrel.dart'; // Will be need for todos
 
 class TasksPage extends ConsumerStatefulWidget {
   final int goalId;
@@ -112,8 +112,7 @@ class _TasksPageState extends ConsumerState<TasksPage> {
                             ),
                           ),
                         _buildTableCell(task.name),
-                        _buildTableCell(
-                            DateFormat('yyyy-MM-dd').format(DateTime.parse(task.period))),
+                        _buildTableCell(task.period),
                         _buildTableCell(task.impact.toString()),
                       ],
                     );
@@ -198,6 +197,7 @@ class _TasksPageState extends ConsumerState<TasksPage> {
     final nameController = TextEditingController();
     DateTime? selectedDate;
     double impactValue = 1; // Default value for the slider
+    String? selectedRecurrence; // This will store the selected recurrence pattern as a string description
 
     showDialog(
       context: context,
@@ -215,20 +215,20 @@ class _TasksPageState extends ConsumerState<TasksPage> {
                     decoration: InputDecoration(labelText: 'Task Name'),
                   ),
                   
-                  // Date picker for Period
                   GestureDetector(
                     onTap: () async {
-                      final DateTime? pickedDate = await showDatePicker(
+                      await showDialog(
                         context: context,
-                        initialDate: DateTime.now(),
-                        firstDate: DateTime(2000),
-                        lastDate: DateTime(2101),
+                        builder: (BuildContext context) {
+                          return CustomRecurrenceDialog(
+                            onRecurrenceSelected: (String pattern) {
+                              setState(() {
+                                selectedRecurrence = pattern;
+                              });
+                            },
+                          );
+                        },
                       );
-                      if (pickedDate != null && pickedDate != selectedDate) {
-                        setState(() {
-                          selectedDate = pickedDate;
-                        });
-                      }
                     },
                     child: Padding(
                       padding: const EdgeInsets.only(top: 16.0),
@@ -236,11 +236,14 @@ class _TasksPageState extends ConsumerState<TasksPage> {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Text(
-                            selectedDate != null
-                                ? "Selected Date: ${selectedDate!.toLocal()}".split(' ')[0]
-                                : 'Pick a Date',
+                            selectedRecurrence != null
+                                ? "Recurrence: $selectedRecurrence"
+                                : 'Set Recurrence',
+                            style: TextStyle(
+                              color: selectedRecurrence == null ? Colors.red : Colors.black, // Optional: show red text if no recurrence selected
+                            ),
                           ),
-                          Icon(Icons.calendar_today),
+                          Icon(Icons.repeat), // Recurrence icon to represent repeat
                         ],
                       ),
                     ),
@@ -280,10 +283,10 @@ class _TasksPageState extends ConsumerState<TasksPage> {
                 ),
                 TextButton(
                   onPressed: () {
-                    if (selectedDate != null && nameController.text.isNotEmpty) {
+                    if (selectedRecurrence != null && nameController.text.isNotEmpty) {
                       final newTask = Task()
                         ..name = nameController.text
-                        ..period = selectedDate!.toIso8601String() // Save as ISO 8601 string
+                        ..period = selectedRecurrence!
                         ..impact = impactValue.round()
                         ..goalId = goalId; // Link to the goal
 
