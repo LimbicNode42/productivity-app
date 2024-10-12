@@ -196,6 +196,12 @@ class _CustomRecurrenceDialogState extends State<CustomRecurrenceDialog> {
                 recurrencePattern += " on ${selectedDays.join(', ')}";
               }
             }
+            if (endType == 'On') {
+              recurrencePattern += " until ${endDate!.toIso8601String()}";
+            }
+            if (endType == 'After') {
+              recurrencePattern += " ${occurrences} times";
+            }
 
             // Send the recurrence pattern back via callback
             widget.onRecurrenceSelected(recurrencePattern);
