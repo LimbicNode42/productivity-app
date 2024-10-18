@@ -17,43 +17,68 @@ const TaskSchema = CollectionSchema(
   name: r'Task',
   id: 2998003626758701373,
   properties: {
-    r'goalId': PropertySchema(
+    r'endDate': PropertySchema(
       id: 0,
+      name: r'endDate',
+      type: IsarType.dateTime,
+    ),
+    r'goalId': PropertySchema(
+      id: 1,
       name: r'goalId',
       type: IsarType.long,
     ),
     r'impact': PropertySchema(
-      id: 1,
+      id: 2,
       name: r'impact',
       type: IsarType.long,
     ),
     r'lastReset': PropertySchema(
-      id: 2,
+      id: 3,
       name: r'lastReset',
       type: IsarType.dateTime,
     ),
+    r'maxResets': PropertySchema(
+      id: 4,
+      name: r'maxResets',
+      type: IsarType.long,
+    ),
     r'name': PropertySchema(
-      id: 3,
+      id: 5,
       name: r'name',
       type: IsarType.string,
     ),
     r'period': PropertySchema(
-      id: 4,
+      id: 6,
       name: r'period',
       type: IsarType.string,
     ),
+    r'resetCount': PropertySchema(
+      id: 7,
+      name: r'resetCount',
+      type: IsarType.long,
+    ),
+    r'resetDays': PropertySchema(
+      id: 8,
+      name: r'resetDays',
+      type: IsarType.longList,
+    ),
+    r'taskTrackingEnabled': PropertySchema(
+      id: 9,
+      name: r'taskTrackingEnabled',
+      type: IsarType.long,
+    ),
     r'trackType': PropertySchema(
-      id: 5,
+      id: 10,
       name: r'trackType',
       type: IsarType.string,
     ),
     r'trackedValue': PropertySchema(
-      id: 6,
+      id: 11,
       name: r'trackedValue',
       type: IsarType.long,
     ),
     r'unit': PropertySchema(
-      id: 7,
+      id: 12,
       name: r'unit',
       type: IsarType.string,
     )
@@ -94,6 +119,7 @@ int _taskEstimateSize(
   var bytesCount = offsets.last;
   bytesCount += 3 + object.name.length * 3;
   bytesCount += 3 + object.period.length * 3;
+  bytesCount += 3 + object.resetDays.length * 8;
   bytesCount += 3 + object.trackType.length * 3;
   bytesCount += 3 + object.unit.length * 3;
   return bytesCount;
@@ -105,14 +131,19 @@ void _taskSerialize(
   List<int> offsets,
   Map<Type, List<int>> allOffsets,
 ) {
-  writer.writeLong(offsets[0], object.goalId);
-  writer.writeLong(offsets[1], object.impact);
-  writer.writeDateTime(offsets[2], object.lastReset);
-  writer.writeString(offsets[3], object.name);
-  writer.writeString(offsets[4], object.period);
-  writer.writeString(offsets[5], object.trackType);
-  writer.writeLong(offsets[6], object.trackedValue);
-  writer.writeString(offsets[7], object.unit);
+  writer.writeDateTime(offsets[0], object.endDate);
+  writer.writeLong(offsets[1], object.goalId);
+  writer.writeLong(offsets[2], object.impact);
+  writer.writeDateTime(offsets[3], object.lastReset);
+  writer.writeLong(offsets[4], object.maxResets);
+  writer.writeString(offsets[5], object.name);
+  writer.writeString(offsets[6], object.period);
+  writer.writeLong(offsets[7], object.resetCount);
+  writer.writeLongList(offsets[8], object.resetDays);
+  writer.writeLong(offsets[9], object.taskTrackingEnabled);
+  writer.writeString(offsets[10], object.trackType);
+  writer.writeLong(offsets[11], object.trackedValue);
+  writer.writeString(offsets[12], object.unit);
 }
 
 Task _taskDeserialize(
@@ -122,15 +153,20 @@ Task _taskDeserialize(
   Map<Type, List<int>> allOffsets,
 ) {
   final object = Task();
-  object.goalId = reader.readLong(offsets[0]);
+  object.endDate = reader.readDateTimeOrNull(offsets[0]);
+  object.goalId = reader.readLong(offsets[1]);
   object.id = id;
-  object.impact = reader.readLong(offsets[1]);
-  object.lastReset = reader.readDateTimeOrNull(offsets[2]);
-  object.name = reader.readString(offsets[3]);
-  object.period = reader.readString(offsets[4]);
-  object.trackType = reader.readString(offsets[5]);
-  object.trackedValue = reader.readLong(offsets[6]);
-  object.unit = reader.readString(offsets[7]);
+  object.impact = reader.readLong(offsets[2]);
+  object.lastReset = reader.readDateTime(offsets[3]);
+  object.maxResets = reader.readLongOrNull(offsets[4]);
+  object.name = reader.readString(offsets[5]);
+  object.period = reader.readString(offsets[6]);
+  object.resetCount = reader.readLong(offsets[7]);
+  object.resetDays = reader.readLongList(offsets[8]) ?? [];
+  object.taskTrackingEnabled = reader.readLong(offsets[9]);
+  object.trackType = reader.readString(offsets[10]);
+  object.trackedValue = reader.readLong(offsets[11]);
+  object.unit = reader.readString(offsets[12]);
   return object;
 }
 
@@ -142,20 +178,30 @@ P _taskDeserializeProp<P>(
 ) {
   switch (propertyId) {
     case 0:
-      return (reader.readLong(offset)) as P;
+      return (reader.readDateTimeOrNull(offset)) as P;
     case 1:
       return (reader.readLong(offset)) as P;
     case 2:
-      return (reader.readDateTimeOrNull(offset)) as P;
+      return (reader.readLong(offset)) as P;
     case 3:
-      return (reader.readString(offset)) as P;
+      return (reader.readDateTime(offset)) as P;
     case 4:
-      return (reader.readString(offset)) as P;
+      return (reader.readLongOrNull(offset)) as P;
     case 5:
       return (reader.readString(offset)) as P;
     case 6:
-      return (reader.readLong(offset)) as P;
+      return (reader.readString(offset)) as P;
     case 7:
+      return (reader.readLong(offset)) as P;
+    case 8:
+      return (reader.readLongList(offset) ?? []) as P;
+    case 9:
+      return (reader.readLong(offset)) as P;
+    case 10:
+      return (reader.readString(offset)) as P;
+    case 11:
+      return (reader.readLong(offset)) as P;
+    case 12:
       return (reader.readString(offset)) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
@@ -346,6 +392,75 @@ extension TaskQueryWhere on QueryBuilder<Task, Task, QWhereClause> {
 }
 
 extension TaskQueryFilter on QueryBuilder<Task, Task, QFilterCondition> {
+  QueryBuilder<Task, Task, QAfterFilterCondition> endDateIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNull(
+        property: r'endDate',
+      ));
+    });
+  }
+
+  QueryBuilder<Task, Task, QAfterFilterCondition> endDateIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNotNull(
+        property: r'endDate',
+      ));
+    });
+  }
+
+  QueryBuilder<Task, Task, QAfterFilterCondition> endDateEqualTo(
+      DateTime? value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'endDate',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<Task, Task, QAfterFilterCondition> endDateGreaterThan(
+    DateTime? value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'endDate',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<Task, Task, QAfterFilterCondition> endDateLessThan(
+    DateTime? value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'endDate',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<Task, Task, QAfterFilterCondition> endDateBetween(
+    DateTime? lower,
+    DateTime? upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'endDate',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+      ));
+    });
+  }
+
   QueryBuilder<Task, Task, QAfterFilterCondition> goalIdEqualTo(int value) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.equalTo(
@@ -502,24 +617,8 @@ extension TaskQueryFilter on QueryBuilder<Task, Task, QFilterCondition> {
     });
   }
 
-  QueryBuilder<Task, Task, QAfterFilterCondition> lastResetIsNull() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(const FilterCondition.isNull(
-        property: r'lastReset',
-      ));
-    });
-  }
-
-  QueryBuilder<Task, Task, QAfterFilterCondition> lastResetIsNotNull() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(const FilterCondition.isNotNull(
-        property: r'lastReset',
-      ));
-    });
-  }
-
   QueryBuilder<Task, Task, QAfterFilterCondition> lastResetEqualTo(
-      DateTime? value) {
+      DateTime value) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.equalTo(
         property: r'lastReset',
@@ -529,7 +628,7 @@ extension TaskQueryFilter on QueryBuilder<Task, Task, QFilterCondition> {
   }
 
   QueryBuilder<Task, Task, QAfterFilterCondition> lastResetGreaterThan(
-    DateTime? value, {
+    DateTime value, {
     bool include = false,
   }) {
     return QueryBuilder.apply(this, (query) {
@@ -542,7 +641,7 @@ extension TaskQueryFilter on QueryBuilder<Task, Task, QFilterCondition> {
   }
 
   QueryBuilder<Task, Task, QAfterFilterCondition> lastResetLessThan(
-    DateTime? value, {
+    DateTime value, {
     bool include = false,
   }) {
     return QueryBuilder.apply(this, (query) {
@@ -555,14 +654,82 @@ extension TaskQueryFilter on QueryBuilder<Task, Task, QFilterCondition> {
   }
 
   QueryBuilder<Task, Task, QAfterFilterCondition> lastResetBetween(
-    DateTime? lower,
-    DateTime? upper, {
+    DateTime lower,
+    DateTime upper, {
     bool includeLower = true,
     bool includeUpper = true,
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.between(
         property: r'lastReset',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+      ));
+    });
+  }
+
+  QueryBuilder<Task, Task, QAfterFilterCondition> maxResetsIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNull(
+        property: r'maxResets',
+      ));
+    });
+  }
+
+  QueryBuilder<Task, Task, QAfterFilterCondition> maxResetsIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNotNull(
+        property: r'maxResets',
+      ));
+    });
+  }
+
+  QueryBuilder<Task, Task, QAfterFilterCondition> maxResetsEqualTo(int? value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'maxResets',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<Task, Task, QAfterFilterCondition> maxResetsGreaterThan(
+    int? value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'maxResets',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<Task, Task, QAfterFilterCondition> maxResetsLessThan(
+    int? value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'maxResets',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<Task, Task, QAfterFilterCondition> maxResetsBetween(
+    int? lower,
+    int? upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'maxResets',
         lower: lower,
         includeLower: includeLower,
         upper: upper,
@@ -823,6 +990,249 @@ extension TaskQueryFilter on QueryBuilder<Task, Task, QFilterCondition> {
       return query.addFilterCondition(FilterCondition.greaterThan(
         property: r'period',
         value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<Task, Task, QAfterFilterCondition> resetCountEqualTo(int value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'resetCount',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<Task, Task, QAfterFilterCondition> resetCountGreaterThan(
+    int value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'resetCount',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<Task, Task, QAfterFilterCondition> resetCountLessThan(
+    int value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'resetCount',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<Task, Task, QAfterFilterCondition> resetCountBetween(
+    int lower,
+    int upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'resetCount',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+      ));
+    });
+  }
+
+  QueryBuilder<Task, Task, QAfterFilterCondition> resetDaysElementEqualTo(
+      int value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'resetDays',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<Task, Task, QAfterFilterCondition> resetDaysElementGreaterThan(
+    int value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'resetDays',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<Task, Task, QAfterFilterCondition> resetDaysElementLessThan(
+    int value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'resetDays',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<Task, Task, QAfterFilterCondition> resetDaysElementBetween(
+    int lower,
+    int upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'resetDays',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+      ));
+    });
+  }
+
+  QueryBuilder<Task, Task, QAfterFilterCondition> resetDaysLengthEqualTo(
+      int length) {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r'resetDays',
+        length,
+        true,
+        length,
+        true,
+      );
+    });
+  }
+
+  QueryBuilder<Task, Task, QAfterFilterCondition> resetDaysIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r'resetDays',
+        0,
+        true,
+        0,
+        true,
+      );
+    });
+  }
+
+  QueryBuilder<Task, Task, QAfterFilterCondition> resetDaysIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r'resetDays',
+        0,
+        false,
+        999999,
+        true,
+      );
+    });
+  }
+
+  QueryBuilder<Task, Task, QAfterFilterCondition> resetDaysLengthLessThan(
+    int length, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r'resetDays',
+        0,
+        true,
+        length,
+        include,
+      );
+    });
+  }
+
+  QueryBuilder<Task, Task, QAfterFilterCondition> resetDaysLengthGreaterThan(
+    int length, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r'resetDays',
+        length,
+        include,
+        999999,
+        true,
+      );
+    });
+  }
+
+  QueryBuilder<Task, Task, QAfterFilterCondition> resetDaysLengthBetween(
+    int lower,
+    int upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r'resetDays',
+        lower,
+        includeLower,
+        upper,
+        includeUpper,
+      );
+    });
+  }
+
+  QueryBuilder<Task, Task, QAfterFilterCondition> taskTrackingEnabledEqualTo(
+      int value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'taskTrackingEnabled',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<Task, Task, QAfterFilterCondition>
+      taskTrackingEnabledGreaterThan(
+    int value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'taskTrackingEnabled',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<Task, Task, QAfterFilterCondition> taskTrackingEnabledLessThan(
+    int value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'taskTrackingEnabled',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<Task, Task, QAfterFilterCondition> taskTrackingEnabledBetween(
+    int lower,
+    int upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'taskTrackingEnabled',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
       ));
     });
   }
@@ -1144,6 +1554,18 @@ extension TaskQueryObject on QueryBuilder<Task, Task, QFilterCondition> {}
 extension TaskQueryLinks on QueryBuilder<Task, Task, QFilterCondition> {}
 
 extension TaskQuerySortBy on QueryBuilder<Task, Task, QSortBy> {
+  QueryBuilder<Task, Task, QAfterSortBy> sortByEndDate() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'endDate', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Task, Task, QAfterSortBy> sortByEndDateDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'endDate', Sort.desc);
+    });
+  }
+
   QueryBuilder<Task, Task, QAfterSortBy> sortByGoalId() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'goalId', Sort.asc);
@@ -1180,6 +1602,18 @@ extension TaskQuerySortBy on QueryBuilder<Task, Task, QSortBy> {
     });
   }
 
+  QueryBuilder<Task, Task, QAfterSortBy> sortByMaxResets() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'maxResets', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Task, Task, QAfterSortBy> sortByMaxResetsDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'maxResets', Sort.desc);
+    });
+  }
+
   QueryBuilder<Task, Task, QAfterSortBy> sortByName() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'name', Sort.asc);
@@ -1201,6 +1635,30 @@ extension TaskQuerySortBy on QueryBuilder<Task, Task, QSortBy> {
   QueryBuilder<Task, Task, QAfterSortBy> sortByPeriodDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'period', Sort.desc);
+    });
+  }
+
+  QueryBuilder<Task, Task, QAfterSortBy> sortByResetCount() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'resetCount', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Task, Task, QAfterSortBy> sortByResetCountDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'resetCount', Sort.desc);
+    });
+  }
+
+  QueryBuilder<Task, Task, QAfterSortBy> sortByTaskTrackingEnabled() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'taskTrackingEnabled', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Task, Task, QAfterSortBy> sortByTaskTrackingEnabledDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'taskTrackingEnabled', Sort.desc);
     });
   }
 
@@ -1242,6 +1700,18 @@ extension TaskQuerySortBy on QueryBuilder<Task, Task, QSortBy> {
 }
 
 extension TaskQuerySortThenBy on QueryBuilder<Task, Task, QSortThenBy> {
+  QueryBuilder<Task, Task, QAfterSortBy> thenByEndDate() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'endDate', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Task, Task, QAfterSortBy> thenByEndDateDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'endDate', Sort.desc);
+    });
+  }
+
   QueryBuilder<Task, Task, QAfterSortBy> thenByGoalId() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'goalId', Sort.asc);
@@ -1290,6 +1760,18 @@ extension TaskQuerySortThenBy on QueryBuilder<Task, Task, QSortThenBy> {
     });
   }
 
+  QueryBuilder<Task, Task, QAfterSortBy> thenByMaxResets() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'maxResets', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Task, Task, QAfterSortBy> thenByMaxResetsDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'maxResets', Sort.desc);
+    });
+  }
+
   QueryBuilder<Task, Task, QAfterSortBy> thenByName() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'name', Sort.asc);
@@ -1311,6 +1793,30 @@ extension TaskQuerySortThenBy on QueryBuilder<Task, Task, QSortThenBy> {
   QueryBuilder<Task, Task, QAfterSortBy> thenByPeriodDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'period', Sort.desc);
+    });
+  }
+
+  QueryBuilder<Task, Task, QAfterSortBy> thenByResetCount() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'resetCount', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Task, Task, QAfterSortBy> thenByResetCountDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'resetCount', Sort.desc);
+    });
+  }
+
+  QueryBuilder<Task, Task, QAfterSortBy> thenByTaskTrackingEnabled() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'taskTrackingEnabled', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Task, Task, QAfterSortBy> thenByTaskTrackingEnabledDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'taskTrackingEnabled', Sort.desc);
     });
   }
 
@@ -1352,6 +1858,12 @@ extension TaskQuerySortThenBy on QueryBuilder<Task, Task, QSortThenBy> {
 }
 
 extension TaskQueryWhereDistinct on QueryBuilder<Task, Task, QDistinct> {
+  QueryBuilder<Task, Task, QDistinct> distinctByEndDate() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'endDate');
+    });
+  }
+
   QueryBuilder<Task, Task, QDistinct> distinctByGoalId() {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'goalId');
@@ -1370,6 +1882,12 @@ extension TaskQueryWhereDistinct on QueryBuilder<Task, Task, QDistinct> {
     });
   }
 
+  QueryBuilder<Task, Task, QDistinct> distinctByMaxResets() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'maxResets');
+    });
+  }
+
   QueryBuilder<Task, Task, QDistinct> distinctByName(
       {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
@@ -1381,6 +1899,24 @@ extension TaskQueryWhereDistinct on QueryBuilder<Task, Task, QDistinct> {
       {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'period', caseSensitive: caseSensitive);
+    });
+  }
+
+  QueryBuilder<Task, Task, QDistinct> distinctByResetCount() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'resetCount');
+    });
+  }
+
+  QueryBuilder<Task, Task, QDistinct> distinctByResetDays() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'resetDays');
+    });
+  }
+
+  QueryBuilder<Task, Task, QDistinct> distinctByTaskTrackingEnabled() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'taskTrackingEnabled');
     });
   }
 
@@ -1412,6 +1948,12 @@ extension TaskQueryProperty on QueryBuilder<Task, Task, QQueryProperty> {
     });
   }
 
+  QueryBuilder<Task, DateTime?, QQueryOperations> endDateProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'endDate');
+    });
+  }
+
   QueryBuilder<Task, int, QQueryOperations> goalIdProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'goalId');
@@ -1424,9 +1966,15 @@ extension TaskQueryProperty on QueryBuilder<Task, Task, QQueryProperty> {
     });
   }
 
-  QueryBuilder<Task, DateTime?, QQueryOperations> lastResetProperty() {
+  QueryBuilder<Task, DateTime, QQueryOperations> lastResetProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'lastReset');
+    });
+  }
+
+  QueryBuilder<Task, int?, QQueryOperations> maxResetsProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'maxResets');
     });
   }
 
@@ -1439,6 +1987,24 @@ extension TaskQueryProperty on QueryBuilder<Task, Task, QQueryProperty> {
   QueryBuilder<Task, String, QQueryOperations> periodProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'period');
+    });
+  }
+
+  QueryBuilder<Task, int, QQueryOperations> resetCountProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'resetCount');
+    });
+  }
+
+  QueryBuilder<Task, List<int>, QQueryOperations> resetDaysProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'resetDays');
+    });
+  }
+
+  QueryBuilder<Task, int, QQueryOperations> taskTrackingEnabledProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'taskTrackingEnabled');
     });
   }
 

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 class CustomRecurrenceDialog extends StatefulWidget {
-  final Function(String) onRecurrenceSelected;
+  final Function(String, List<int>?, DateTime?, int?) onRecurrenceSelected;
 
   CustomRecurrenceDialog({required this.onRecurrenceSelected});
 
@@ -14,8 +14,8 @@ class _CustomRecurrenceDialogState extends State<CustomRecurrenceDialog> {
   String frequency = 'week';
   List<bool> daysOfWeek = [false, false, false, false, false, false, false];
   String endType = 'Never';
-  DateTime? endDate;
-  int occurrences = 1;
+  DateTime? endDate = null;
+  int? occurrences = null;
 
   @override
   Widget build(BuildContext context) {
@@ -184,12 +184,15 @@ class _CustomRecurrenceDialogState extends State<CustomRecurrenceDialog> {
           onPressed: () {
             // Construct the recurrence pattern string
             String recurrencePattern = "Every $repeatEvery $frequency";
+            List<int> datetimeDays = [];
+
             if (frequency == 'week') {
               List<String> selectedDays = [];
-              List<String> days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+              List<String> days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
               for (int i = 0; i < daysOfWeek.length; i++) {
                 if (daysOfWeek[i]) {
                   selectedDays.add(days[i]);
+                  datetimeDays.add(i);
                 }
               }
               if (selectedDays.isNotEmpty) {
@@ -200,11 +203,15 @@ class _CustomRecurrenceDialogState extends State<CustomRecurrenceDialog> {
               recurrencePattern += " until ${endDate!.toIso8601String()}";
             }
             if (endType == 'After') {
-              recurrencePattern += " ${occurrences} times";
+              recurrencePattern += " ${occurrences!} times";
+            }
+
+            if (datetimeDays.isEmpty) {
+              datetimeDays = [DateTime.now().weekday];
             }
 
             // Send the recurrence pattern back via callback
-            widget.onRecurrenceSelected(recurrencePattern);
+            widget.onRecurrenceSelected(recurrencePattern, datetimeDays, endDate, occurrences);
 
             Navigator.pop(context);
           },

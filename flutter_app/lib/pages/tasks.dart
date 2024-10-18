@@ -195,11 +195,13 @@ class _TasksPageState extends ConsumerState<TasksPage> {
 
   void _showAddTaskDialog(BuildContext context, WidgetRef ref, int goalId) {
     final nameController = TextEditingController();
-    DateTime? selectedDate;
+    List<String> trackTypes = ['Counter', 'Checkbox']; // Options for track type
     double impactValue = 1; // Default value for the slider
     String? selectedRecurrence; // This will store the selected recurrence pattern as a string description
     String? selectedTrackType; // Track type selected by the user
-    List<String> trackTypes = ['Counter', 'Checkbox']; // Options for track type
+    List<int>? selectedDays;
+    DateTime? selectedEndDate;
+    int? selectedOccurrences;
 
     showDialog(
       context: context,
@@ -223,9 +225,12 @@ class _TasksPageState extends ConsumerState<TasksPage> {
                         context: context,
                         builder: (BuildContext context) {
                           return CustomRecurrenceDialog(
-                            onRecurrenceSelected: (String pattern) {
+                            onRecurrenceSelected: (String pattern, List<int>? days, DateTime? endDate, int? occurrences) {
                               setState(() {
                                 selectedRecurrence = pattern;
+                                selectedDays = days;
+                                selectedEndDate = endDate;
+                                selectedOccurrences = occurrences;
                               });
                             },
                           );
@@ -314,13 +319,18 @@ class _TasksPageState extends ConsumerState<TasksPage> {
                     if (selectedRecurrence != null && nameController.text.isNotEmpty && selectedTrackType != null) {
                       // Map the selectedTrackType to either "int" or "bool" based on the dropdown value
                       String trackType = selectedTrackType == 'Counter' ? 'int' : 'bool';
+                      DateTime now = DateTime.now();
 
                       final newTask = Task()
                         ..name = nameController.text
                         ..period = selectedRecurrence!
                         ..impact = impactValue.round()
                         ..goalId = goalId // Link to the goal
-                        ..trackType = trackType;
+                        ..trackType = trackType
+                        ..lastReset = now
+                        ..resetDays = selectedDays!
+                        ..endDate = selectedEndDate
+                        .. maxResets = selectedOccurrences;
 
                       ref.read(taskNotifierProvider(widget.goalId).notifier).addTask(newTask);
                       Navigator.of(context).pop(); // Close dialog

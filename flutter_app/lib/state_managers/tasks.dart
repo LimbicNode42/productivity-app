@@ -62,4 +62,27 @@ class TaskNotifier extends StateNotifier<List<Task>> {
       state = state.where((t) => t.id != task.id).toList();
     }
   }
+
+  Future<void> resetTaskTracking(Task task) async {
+    DateTime now = DateTime.now();
+    
+    // 1. Check if today is one of the selected reset days
+    if (task.resetDays != null && !task.resetDays!.contains(now.weekday)) {
+      return; // It's not a reset day, so exit the function.
+    }
+
+    // 2. Check if the end date has passed
+    if (task.endDate != null && now.isAfter(task.endDate!)) {
+      Task updatedTask = task..taskTrackingEnabled = 0;
+      updateTask(updatedTask);
+      return; // End date has passed, stop resetting.
+    }
+
+    // 3. Check if the maximum number of resets has been reached
+    if (task.maxResets != null && task.resetCount >= task.maxResets!) {
+      Task updatedTask = task..taskTrackingEnabled = 0;
+      updateTask(updatedTask);
+      return; // Maximum resets reached, stop resetting.
+    }
+  }
 }

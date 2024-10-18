@@ -17,5 +17,11 @@ class Task {
   late int trackedValue; // The tracked value for the task
   late String unit; // Optional field for units (e.g., "times", "days")
 
-  DateTime? lastReset; // The date when the last reset occurred
+  late DateTime lastReset; // The date when the last reset occurred
+  late List<int> resetDays; // List of days of the week when the task should reset (e.g., 1 = Monday)
+  DateTime? endDate; // Optional: Stop resetting after this date
+  int? maxResets; // Optional: Stop resetting after this many resets
+  int resetCount = 0; // Count how many times the task has been reset
+
+  int taskTrackingEnabled = 1;
 }
