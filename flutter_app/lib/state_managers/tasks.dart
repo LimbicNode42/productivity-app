@@ -54,12 +54,12 @@ class TaskNotifier extends StateNotifier<List<Task>> {
     state = state.where((task) => task.id != id).toList();
   }
 
-Future<void> deleteTasks(List<Task> tasks) async {
-  for (Task task in tasks) {
-    // Delete the task using the DAO
-    await taskDao.deleteTask(task.id);
-    // Update the state to remove the deleted task
-    state = state.where((t) => t.id != task.id).toList();
+  Future<void> deleteTasks(List<Task> tasks) async {
+    for (Task task in tasks) {
+      // Delete the task using the DAO
+      await taskDao.deleteTask(task.id);
+      // Update the state to remove the deleted task
+      state = state.where((t) => t.id != task.id).toList();
+    }
   }
-}
 }

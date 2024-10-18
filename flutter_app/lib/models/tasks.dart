@@ -11,4 +11,11 @@ class Task {
 
   @Index()
   late int goalId; // The ID of the goal this task is associated with
+
+  // New fields
+  late String trackType; // Type of tracking (e.g., "count", "boolean", "radio")
+  late int trackedValue; // The tracked value for the task
+  late String unit; // Optional field for units (e.g., "times", "days")
+
+  DateTime? lastReset; // The date when the last reset occurred
 }

@@ -198,6 +198,8 @@ class _TasksPageState extends ConsumerState<TasksPage> {
     DateTime? selectedDate;
     double impactValue = 1; // Default value for the slider
     String? selectedRecurrence; // This will store the selected recurrence pattern as a string description
+    String? selectedTrackType; // Track type selected by the user
+    List<String> trackTypes = ['Counter', 'Checkbox']; // Options for track type
 
     showDialog(
       context: context,
@@ -249,6 +251,32 @@ class _TasksPageState extends ConsumerState<TasksPage> {
                     ),
                   ),
 
+                  // Dropdown for Track Type Selection
+                  Padding(
+                    padding: const EdgeInsets.only(top: 16.0),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text('Track Type'),
+                        DropdownButton<String>(
+                          value: selectedTrackType,
+                          hint: Text('Select Track Type'),
+                          onChanged: (String? newValue) {
+                            setState(() {
+                              selectedTrackType = newValue;
+                            });
+                          },
+                          items: trackTypes.map<DropdownMenuItem<String>>((String value) {
+                            return DropdownMenuItem<String>(
+                              value: value,
+                              child: Text(value),
+                            );
+                          }).toList(),
+                        ),
+                      ],
+                    ),
+                  ),
+
                   // Slider for Impact
                   Padding(
                     padding: const EdgeInsets.only(top: 16.0),
@@ -283,12 +311,16 @@ class _TasksPageState extends ConsumerState<TasksPage> {
                 ),
                 TextButton(
                   onPressed: () {
-                    if (selectedRecurrence != null && nameController.text.isNotEmpty) {
+                    if (selectedRecurrence != null && nameController.text.isNotEmpty && selectedTrackType != null) {
+                      // Map the selectedTrackType to either "int" or "bool" based on the dropdown value
+                      String trackType = selectedTrackType == 'Counter' ? 'int' : 'bool';
+
                       final newTask = Task()
                         ..name = nameController.text
                         ..period = selectedRecurrence!
                         ..impact = impactValue.round()
-                        ..goalId = goalId; // Link to the goal
+                        ..goalId = goalId // Link to the goal
+                        ..trackType = trackType;
 
                       ref.read(taskNotifierProvider(widget.goalId).notifier).addTask(newTask);
                       Navigator.of(context).pop(); // Close dialog
