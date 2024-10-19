@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 class CustomRecurrenceDialog extends StatefulWidget {
-  final Function(String, List<int>?, DateTime?, int?) onRecurrenceSelected;
+  final Function(String, String, int, List<int>?, DateTime?, int?) onRecurrenceSelected;
 
   CustomRecurrenceDialog({required this.onRecurrenceSelected});
 
@@ -211,7 +211,7 @@ class _CustomRecurrenceDialogState extends State<CustomRecurrenceDialog> {
             }
 
             // Send the recurrence pattern back via callback
-            widget.onRecurrenceSelected(recurrencePattern, datetimeDays, endDate, occurrences);
+            widget.onRecurrenceSelected(recurrencePattern, frequency, repeatEvery, datetimeDays, endDate, occurrences);
 
             Navigator.pop(context);
           },

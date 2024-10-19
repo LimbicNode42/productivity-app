@@ -202,6 +202,8 @@ class _TasksPageState extends ConsumerState<TasksPage> {
     List<int>? selectedDays;
     DateTime? selectedEndDate;
     int? selectedOccurrences;
+    late String selectedRecurrencePeriod;
+    late int selectedRecurrenceInterval;
 
     showDialog(
       context: context,
@@ -225,9 +227,11 @@ class _TasksPageState extends ConsumerState<TasksPage> {
                         context: context,
                         builder: (BuildContext context) {
                           return CustomRecurrenceDialog(
-                            onRecurrenceSelected: (String pattern, List<int>? days, DateTime? endDate, int? occurrences) {
+                            onRecurrenceSelected: (String pattern, String recurrencePeriod, int recurrenceInterval, List<int>? days, DateTime? endDate, int? occurrences) {
                               setState(() {
                                 selectedRecurrence = pattern;
+                                selectedRecurrencePeriod = recurrencePeriod;
+                                selectedRecurrenceInterval = recurrenceInterval;
                                 selectedDays = days;
                                 selectedEndDate = endDate;
                                 selectedOccurrences = occurrences;
@@ -324,9 +328,12 @@ class _TasksPageState extends ConsumerState<TasksPage> {
                       final newTask = Task()
                         ..name = nameController.text
                         ..period = selectedRecurrence!
+                        ..recurrencePeriod = selectedRecurrencePeriod
+                        ..recurrenceInterval = selectedRecurrenceInterval
                         ..impact = impactValue.round()
                         ..goalId = goalId // Link to the goal
                         ..trackType = trackType
+                        ..trackedValue = 0
                         ..lastReset = now
                         ..resetDays = selectedDays!
                         ..endDate = selectedEndDate

@@ -84,5 +84,105 @@ class TaskNotifier extends StateNotifier<List<Task>> {
       updateTask(updatedTask);
       return; // Maximum resets reached, stop resetting.
     }
+
+    // Calculate the next reset date based on the recurrence period (if using time intervals)
+    DateTime nextResetDate = _calculateNextResetDateWithEnd(task)!;
+    
+    if (now.isAfter(nextResetDate)) {
+      // Store the tracked value in TaskHistory for graphing
+      // final newHistory = TaskHistory()
+      //   ..taskId = task.id
+      //   ..finalValue = task.trackedValue
+      //   ..dateRecorded = now;
+
+      // Save history to the database
+      // await ref.read(taskHistoryDaoProvider).addTaskHistory(newHistory);
+
+      // Reset the tracked value and increment the reset count
+      task.trackedValue = 0;
+      task.lastReset = now;
+      task.resetCount += 1;
+
+      // Save the updated task back to the database
+      await updateTask(task);
+    }
+  }
+
+  DateTime? _calculateNextResetDate(Task task) {
+    DateTime now = DateTime.now();
+    DateTime lastReset = task.lastReset ?? now;
+
+    switch (task.recurrencePeriod) {
+      case 'daily':
+        return lastReset.add(Duration(days: task.recurrenceInterval)); // e.g., 1 day or 4 days
+
+      case 'weekly':
+        return _calculateNextWeeklyReset(task, lastReset);
+
+      case 'monthly':
+        return _calculateNextMonthlyReset(lastReset, task.recurrenceInterval);
+
+      case 'yearly':
+        return _calculateNextYearlyReset(lastReset, task.recurrenceInterval);
+
+      default:
+        return now; // Default case if no valid recurrencePeriod found
+    }
+  }
+
+  // Weekly reset helper (handles multiple days like "Tue", "Thu")
+  DateTime _calculateNextWeeklyReset(Task task, DateTime lastReset) {
+    List<int> resetDays = task.resetDays ?? [];
+
+    int currentWeekday = lastReset.weekday;
+    for (int day in resetDays) {
+      if (day > currentWeekday) {
+        return lastReset.add(Duration(days: day - currentWeekday));
+      }
+    }
+
+    // If no future reset day found, reset on the first reset day in the next week
+    int firstResetDayNextWeek = resetDays.first;
+    return lastReset.add(Duration(days: (7 - currentWeekday) + firstResetDayNextWeek));
+  }
+
+  // Monthly reset helper
+  DateTime _calculateNextMonthlyReset(DateTime lastReset, int interval) {
+    int year = lastReset.year;
+    int month = lastReset.month + interval; // Add the interval (e.g., 1 month)
+
+    if (month > 12) {
+      year += 1;
+      month = month % 12;
+    }
+
+    int day = lastReset.day;
+    int maxDayOfNextMonth = DateTime(year, month + 1, 0).day;
+    if (day > maxDayOfNextMonth) {
+      day = maxDayOfNextMonth;
+    }
+
+    return DateTime(year, month, day);
+  }
+
+  // Yearly reset helper
+  DateTime _calculateNextYearlyReset(DateTime lastReset, int interval) {
+    return DateTime(lastReset.year + interval, lastReset.month, lastReset.day);
+  }
+
+  // Stop tracking logic
+  DateTime? _calculateNextResetDateWithEnd(Task task) {
+    DateTime nextReset = _calculateNextResetDate(task)!;
+
+    // Stop after end date
+    if (task.endDate != null && nextReset.isAfter(task.endDate!)) {
+      return DateTime.now().add(Duration(days: 1));
+    }
+
+    if (task.maxResets != null && task.resetCount >= task.maxResets!) {
+      return DateTime.now().add(Duration(days: 1));
+    }
+
+    return nextReset;
   }
 }

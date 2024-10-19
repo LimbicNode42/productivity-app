@@ -7,6 +7,8 @@ class Task {
   Id id = Isar.autoIncrement; // Auto-incremented ID for the task
   late String name; // Name of the task
   late String period; // Period of the task (e.g., daily, weekly)
+  late String recurrencePeriod;
+  late int recurrenceInterval;
   late int impact; // Impact level of the task (1-10)
 
   @Index()
@@ -15,7 +17,6 @@ class Task {
   // New fields
   late String trackType; // Type of tracking (e.g., "count", "boolean", "radio")
   late int trackedValue; // The tracked value for the task
-  late String unit; // Optional field for units (e.g., "times", "days")
 
   late DateTime lastReset; // The date when the last reset occurred
   late List<int> resetDays; // List of days of the week when the task should reset (e.g., 1 = Monday)
