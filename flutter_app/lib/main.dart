@@ -1,6 +1,7 @@
 // main.dart
 import 'package:flutter_app/dao/blocked_apps.dart';
 import 'package:flutter_app/dao/goal_categories.dart';
+import 'package:flutter_app/dao/task_history.dart';
 import 'package:flutter_app/models/blocked_apps.dart';
 import 'package:flutter_app/models/goal_categories.dart';
 import 'package:flutter_app/pages/installed_apps.dart';
@@ -23,6 +24,9 @@ import 'package:flutter_app/state_managers/goals.dart';
 import 'package:flutter_app/models/tasks.dart';
 import 'package:flutter_app/dao/tasks.dart';
 import 'package:flutter_app/state_managers/tasks.dart';
+import 'package:flutter_app/models/task_history.dart';
+import 'package:flutter_app/dao/task_history.dart';
+import 'package:flutter_app/state_managers/task_history.dart';
 import 'package:flutter_app/ui_components/transitions.dart';
 import 'package:flutter_app/pages/barrel.dart';
 import 'package:flutter_app/models/blocked_apps.dart';
@@ -39,7 +43,8 @@ void main() async {
     [
       GoalCategorySchema,
       GoalSchema, 
-      TaskSchema, 
+      TaskSchema,
+      TaskHistorySchema,
       BlockedAppSchema
     ], 
     directory: _dir.path
@@ -51,6 +56,7 @@ void main() async {
         goalCategoryDaoProvider.overrideWithValue(GoalCategoryDao(_isar)),
         goalDaoProvider.overrideWithValue(GoalDao(_isar)),
         taskDaoProvider.overrideWithValue(TaskDao(_isar)),
+        taskHistoryDaoProvider.overrideWithValue(TaskHistoryDao(_isar)),
         blockedAppDaoProvider.overrideWithValue(BlockedAppDao(_isar)),
       ],
       child: MyApp(
