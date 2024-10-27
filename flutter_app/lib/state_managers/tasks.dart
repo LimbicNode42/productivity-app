@@ -1,7 +1,9 @@
+import 'package:flutter_app/state_managers/task_history.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:flutter_app/models/tasks.dart';
 import 'package:flutter_app/dao/tasks.dart';
+import 'package:flutter_app/models/task_history.dart';
 
 // Assuming Isar instance is created somewhere globally
 final taskDaoProvider = Provider<TaskDao>((ref) {
@@ -10,12 +12,18 @@ final taskDaoProvider = Provider<TaskDao>((ref) {
 });
 
 // A FutureProvider to handle the list of tasks for a specific goal
-final tasksProvider = FutureProvider.family<List<Task>, int>((ref, goalId) async {
+final tasksProvider = FutureProvider<List<Task>>((ref) async {
+  final taskRepo = ref.read(taskDaoProvider);
+  return await taskRepo.getAllTasks();
+});
+
+// A FutureProvider to handle the list of tasks for a specific goal
+final taskProvider = FutureProvider.family<List<Task>, int>((ref, goalId) async {
   final taskRepo = ref.read(taskDaoProvider);
   return await taskRepo.getAllTasksForGoal(goalId);
 });
 
-final taskNotifierProvider = StateNotifierProvider.family<TaskNotifier, List<Task>, int>((ref, goalId) {
+final taskNotifierProvider = StateNotifierProvider.family<TaskNotifier, List<Task>, int?>((ref, goalId) {
   final taskDao = ref.read(taskDaoProvider);
   return TaskNotifier(taskDao, goalId);
 });
@@ -23,17 +31,24 @@ final taskNotifierProvider = StateNotifierProvider.family<TaskNotifier, List<Tas
 class TaskNotifier extends StateNotifier<List<Task>> {
   final TaskDao taskDao;
   bool isLoading = true; // Add loading state
-  final int goalId;
+  final int? goalId;
 
-  TaskNotifier(this.taskDao, this.goalId) : super([]) {
+  TaskNotifier(this.taskDao, [this.goalId]) : super([]) {
     loadTasks();
   }
 
   Future<void> loadTasks() async {
-    isLoading = true; // Set loading state to true
-    final tasks = await taskDao.getAllTasksForGoal(goalId);
-    state = tasks;
-    isLoading = false; // Set loading state to false
+    if (goalId != null) {
+      isLoading = true; // Set loading state to true
+      final tasks = await taskDao.getAllTasksForGoal(goalId!);
+      state = tasks;
+      isLoading = false; // Set loading state to false
+    } else {
+      isLoading = true; // Set loading state to true
+      final tasks = await taskDao.getAllTasks();
+      state = tasks;
+      isLoading = false; // Set loading state to false
+    }
   }
 
   Future<void> addTask(Task task) async {
@@ -90,13 +105,14 @@ class TaskNotifier extends StateNotifier<List<Task>> {
     
     if (now.isAfter(nextResetDate)) {
       // Store the tracked value in TaskHistory for graphing
-      // final newHistory = TaskHistory()
-      //   ..taskId = task.id
-      //   ..finalValue = task.trackedValue
-      //   ..dateRecorded = now;
+      final newHistory = TaskHistory()
+        ..taskId = task.id
+        ..finalValue = task.trackedValue
+        ..dateRecorded = now;
 
-      // Save history to the database
-      // await ref.read(taskHistoryDaoProvider).addTaskHistory(newHistory);
+      final providerContainer = ProviderContainer();
+      final taskHistoryNotifier = providerContainer.read(taskHistoryNotifierProvider(null).notifier);
+      taskHistoryNotifier.addTaskHistory(newHistory);
 
       // Reset the tracked value and increment the reset count
       task.trackedValue = 0;

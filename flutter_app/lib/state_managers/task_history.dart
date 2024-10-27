@@ -15,7 +15,7 @@ final taskHistoryProvider = FutureProvider.family<List<TaskHistory>, int>((ref, 
   return await taskHistoryRepo.getAllTaskHistoryForTask(taskId);
 });
 
-final taskHistoryNotifierProvider = StateNotifierProvider.family<TaskHistoryNotifier, List<TaskHistory>, int>((ref, taskId) {
+final taskHistoryNotifierProvider = StateNotifierProvider.family<TaskHistoryNotifier, List<TaskHistory>, int?>((ref, taskId) {
   final taskHistoryDao = ref.read(taskHistoryDaoProvider);
   return TaskHistoryNotifier(taskHistoryDao, taskId);
 });
@@ -23,17 +23,24 @@ final taskHistoryNotifierProvider = StateNotifierProvider.family<TaskHistoryNoti
 class TaskHistoryNotifier extends StateNotifier<List<TaskHistory>> {
   final TaskHistoryDao taskHistoryDao;
   bool isLoading = true; // Add loading state
-  final int taskId;
+  final int? taskId;
 
-  TaskHistoryNotifier(this.taskHistoryDao, this.taskId) : super([]) {
+  TaskHistoryNotifier(this.taskHistoryDao, [this.taskId]) : super([]) {
     loadTaskHistory();
   }
 
   Future<void> loadTaskHistory() async {
-    isLoading = true; // Set loading state to true
-    final taskHistory = await taskHistoryDao.getAllTaskHistoryForTask(taskId);
-    state = taskHistory;
-    isLoading = false; // Set loading state to false
+    if (taskId != null) {
+      isLoading = true; // Set loading state to true
+      final taskHistory = await taskHistoryDao.getAllTaskHistoryForTask(taskId!);
+      state = taskHistory;
+      isLoading = false; // Set loading state to false
+    } else {
+      isLoading = true; // Set loading state to true
+      final taskHistory = await taskHistoryDao.getAllTaskHistory();
+      state = taskHistory;
+      isLoading = false; // Set loading state to false
+    }
   }
 
   Future<void> addTaskHistory(TaskHistory taskHistory) async {

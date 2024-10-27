@@ -86,6 +86,7 @@ void onReceiveTaskData(Object? data) {
     }
   }
 }
+
 // TODO: will need to add a check for permanently denied permission and add prompt to allow
 // Once permanently denied requires user to open settings
 Future<ServiceRequestResult> startForegroundService() async {

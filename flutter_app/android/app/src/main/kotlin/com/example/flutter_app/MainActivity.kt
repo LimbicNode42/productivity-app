@@ -12,6 +12,7 @@ import androidx.annotation.NonNull
 import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.MethodChannel
+import be.tramckrijte.workmanager.WorkmanagerPlugin
 
 class MainActivity: FlutterActivity() {
     private val CHANNEL = "com.example/android_native"
@@ -19,6 +20,7 @@ class MainActivity: FlutterActivity() {
 
     override fun configureFlutterEngine(@NonNull flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
+        WorkmanagerPlugin.registerWith(flutterEngine)
 
         MethodChannel(flutterEngine.dartExecutor.binaryMessenger, CHANNEL).setMethodCallHandler { call, result ->
             if (call.method == "checkUsageStatsPermission") {

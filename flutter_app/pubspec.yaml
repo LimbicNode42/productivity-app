@@ -51,6 +51,7 @@ dependencies:
   installed_apps: ^1.5.2
   flutter_foreground_task: ^8.10.4
   flutter_local_notifications: ^17.2.3
+  workmanager: ^0.5.2
 
 dev_dependencies:
   flutter_test:

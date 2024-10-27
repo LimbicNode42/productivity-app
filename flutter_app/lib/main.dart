@@ -14,6 +14,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:isar/isar.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter/material.dart';
+import 'package:workmanager/workmanager.dart';
 
 import 'package:flutter_app/daemonish/handlers.dart';
 import 'package:flutter_app/notifications/config.dart';
@@ -30,6 +31,7 @@ import 'package:flutter_app/state_managers/task_history.dart';
 import 'package:flutter_app/ui_components/transitions.dart';
 import 'package:flutter_app/pages/barrel.dart';
 import 'package:flutter_app/models/blocked_apps.dart';
+import 'package:flutter_app/daemonish/workmanager.dart';
 
 //This function triggers the build process
 void main() async {
@@ -85,6 +87,13 @@ class _MyAppState extends State<MyApp> {
     });
 
     FlutterForegroundTask.addTaskDataCallback(onReceiveTaskData);
+
+    Workmanager().initialize(
+      workmanagerDispatcher,
+      isInDebugMode: true, // Set to false for production
+    );
+
+    scheduleDailyTaskAtMidnight();
   }
 
   @override
